@@ -1,0 +1,29 @@
+﻿<Window
+    x:Class="VisualFindReferences.TestHarness.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:VisualFindReferences.TestHarness"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ngv="clr-namespace:VisualFindReferences.Core.Graph.View;assembly=VisualFindReferences.Core"
+    Title="Visual Find References Test Harness"
+    Width="1600"
+    Height="900"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <Style x:Key="CategoryTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="ExtraBold" />
+            <Setter Property="Background" Value="Black" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <ContextMenu x:Key="NodeContextMenu">
+            <MenuItem Click="DeleteItem" Header="Remove" />
+        </ContextMenu>
+    </Window.Resources>
+    <Grid>
+        <ngv:FlowChartView DataContext="{Binding Path=FlowChartViewModel, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}" NodeContextMenuRequested="FlowChartView_NodeContextMenuRequested" />
+    </Grid>
+</Window>
