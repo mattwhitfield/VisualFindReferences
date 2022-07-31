@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	  <SignAssembly>true</SignAssembly>
+	  <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
+      <CodeAnalysisRuleSet>..\VisualFindReferences.ruleset</CodeAnalysisRuleSet>
+	  <DelaySign>false</DelaySign>
+	  <LangVersion>8.0</LangVersion>
+	  <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+  </ItemGroup>
+
+</Project>

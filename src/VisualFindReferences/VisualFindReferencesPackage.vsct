@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<Include href="KnownImageIds.vsct"/>
+	<Extern href="stdidcmd.h" />
+	<Extern href="vsshlids.h" />
+	<Commands package="guidVisualFindReferencesPackage">
+		<Buttons>
+			<Button guid="guidVisualFindReferencesCmdSet" id="VisualFindReferencesFromCodeCommandId" priority="0x0100" type="Button">
+				<Parent guid="guidVisualFindReferencesCmdSet" id="codeEditorMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="ShowReferencedElements" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Visual Find References...</ButtonText>
+				</Strings>
+			</Button>
+		</Buttons>
+	</Commands>
+	<CommandPlacements>
+		<CommandPlacement guid="guidVisualFindReferencesCmdSet" id="VisualFindReferencesFromCodeCommandId" priority="0x0401">
+			<Parent guid="guidSHLMainMenu" id="IDG_VS_CODEWIN_NAVIGATETOLOCATION"/>
+		</CommandPlacement>
+	</CommandPlacements>
+	<Symbols>
+		<GuidSymbol name="guidVisualFindReferencesPackage" value="{2522985f-eb3b-41f9-b25b-84f5c8f80102}" />
+		<GuidSymbol name="guidVisualFindReferencesCmdSet" value="{7f92c847-7ac9-4fab-8302-381e222bce9f}">
+			<IDSymbol name="codeEditorMenuGroup" value="0x1020" />
+			<IDSymbol name="VisualFindReferencesFromCodeCommandId" value="0x0102"/>
+		</GuidSymbol>
+	</Symbols>
+</CommandTable>

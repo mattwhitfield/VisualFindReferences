@@ -1,0 +1,14 @@
+{
+    "$schema": "http://json.schemastore.org/vsix-publish",
+    "categories": [ "coding" ],  
+    "identity": {
+        "internalName": "VisualFindReferencesVS2022", 
+        "tags": [ "C#", "references", "navigation", "graph" ]
+    },
+    "overview": "MarketplaceOverview.md",           
+    "priceCategory": "free",             
+    "publisher": "mattwhitfield",       
+    "private": false,                     
+    "qna": true,                          
+    "repo": "https://github.com/mattwhitfield/VisualFindReferences"
+}
