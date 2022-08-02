@@ -6,7 +6,7 @@ using VisualFindReferences.Core.Graph.ViewModel;
 
 namespace VisualFindReferences.Core.Graph.View
 {
-    public class ConnectorView : ContentControl
+    public class ConnectorView : ContentControl, IHighlightable
     {
         public ConnectorViewModel? ViewModel { get; private set; }
 
@@ -16,6 +16,15 @@ namespace VisualFindReferences.Core.Graph.View
             set { SetValue(CurveDataProperty, value); }
         }
 
+        public bool IsHighlighted
+        {
+            get { return (bool)GetValue(IsHighlightedProperty); }
+            set { SetValue(IsHighlightedProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsHighlightedProperty =
+            DependencyProperty.Register("IsHighlighted", typeof(bool), typeof(ConnectorView), new PropertyMetadata(false));
+
         public static readonly DependencyProperty CurveDataProperty =
             DependencyProperty.Register("CurveData", typeof(string), typeof(ConnectorView), new PropertyMetadata(string.Empty));
 
@@ -23,15 +32,38 @@ namespace VisualFindReferences.Core.Graph.View
         {
             LayoutUpdated += ConnectorView_LayoutUpdated;
             DataContextChanged += ConnectorView_DataContextChanged;
+            Loaded += ConnectorView_Loaded;
+        }
+
+        private void ConnectorView_Loaded(object sender, RoutedEventArgs e)
+        {
+            SynchronizeProperties();
         }
 
         private void ConnectorView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            if (ViewModel != null)
+            {
+                ViewModel.PropertyChanged -= ViewModelPropertyChanged;
+            }
             ViewModel = DataContext as ConnectorViewModel;
             if (ViewModel != null)
             {
                 ViewModel.View = this;
+                ViewModel.PropertyChanged += ViewModelPropertyChanged;
             }
+
+            SynchronizeProperties();
+        }
+
+        protected virtual void SynchronizeProperties()
+        {
+            IsHighlighted = ViewModel?.IsHighlighted ?? false;
+        }
+
+        protected virtual void ViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            SynchronizeProperties();
         }
 
         private void ConnectorView_LayoutUpdated(object sender, EventArgs e)

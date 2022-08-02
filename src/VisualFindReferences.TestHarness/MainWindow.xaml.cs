@@ -134,6 +134,8 @@ namespace VisualFindReferences.TestHarness
             bool includeBack = true;
 
             var node1 = CreateNode(nodeGraph, 1);
+            node1.IsRoot = true;
+
             var node2 = CreateNode(nodeGraph, 2);
             var node3 = CreateNode(nodeGraph, 3);
             var node4 = CreateNode(nodeGraph, 4);
@@ -144,13 +146,15 @@ namespace VisualFindReferences.TestHarness
             var node9 = CreateNode(nodeGraph, 9);
             var node10 = CreateNode(nodeGraph, 10);
 
+            node6.ViewModel.IsHighlighted = true;
+
             nodeGraph.Connectors.Add(new Connector(nodeGraph, node1, node5));
             nodeGraph.Connectors.Add(new Connector(nodeGraph, node1, node7));
             nodeGraph.Connectors.Add(new Connector(nodeGraph, node7, node4));
             nodeGraph.Connectors.Add(new Connector(nodeGraph, node7, node6));
             nodeGraph.Connectors.Add(new Connector(nodeGraph, node6, node3));
             nodeGraph.Connectors.Add(new Connector(nodeGraph, node5, node2));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node4, node5));
+            //nodeGraph.Connectors.Add(new Connector(nodeGraph, node4, node5));
             nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node3));
             nodeGraph.Connectors.Add(new Connector(nodeGraph, node5, node8));
             nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node9));

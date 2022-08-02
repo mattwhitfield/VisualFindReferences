@@ -2,12 +2,13 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using VisualFindReferences.Core.Graph.Helper;
 using VisualFindReferences.Core.Graph.Model;
 using VisualFindReferences.Core.Graph.ViewModel;
 
 namespace VisualFindReferences.Core.Graph.View
 {
-    public class NodeView : ContentControl
+    public class NodeView : ContentControl, IHighlightable
     {
         public NodeViewModel? ViewModel { get; private set; }
 
@@ -19,6 +20,15 @@ namespace VisualFindReferences.Core.Graph.View
 
         public static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register("IsSelected", typeof(bool), typeof(NodeView), new PropertyMetadata(false));
+
+        public bool IsHighlighted
+        {
+            get { return (bool)GetValue(IsHighlightedProperty); }
+            set { SetValue(IsHighlightedProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsHighlightedProperty =
+            DependencyProperty.Register("IsHighlighted", typeof(bool), typeof(NodeView), new PropertyMetadata(false));
 
         public NodeView()
         {
@@ -33,11 +43,16 @@ namespace VisualFindReferences.Core.Graph.View
 
         private void NodeView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            if (ViewModel != null)
+            {
+                ViewModel.PropertyChanged -= ViewModelPropertyChanged;
+            }
             ViewModel = DataContext as NodeViewModel;
-            if (null == ViewModel)
-                throw new Exception("ViewModel must be bound as DataContext in NodeView.");
-            ViewModel.View = this;
-            ViewModel.PropertyChanged += ViewModelPropertyChanged;
+            if (ViewModel != null)
+            {
+                ViewModel.View = this;
+                ViewModel.PropertyChanged += ViewModelPropertyChanged;
+            }
 
             SynchronizeProperties();
         }
@@ -45,6 +60,7 @@ namespace VisualFindReferences.Core.Graph.View
         protected virtual void SynchronizeProperties()
         {
             IsSelected = ViewModel?.IsSelected ?? false;
+            IsHighlighted = ViewModel?.IsHighlighted ?? false;
         }
 
         protected virtual void ViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -105,6 +121,32 @@ namespace VisualFindReferences.Core.Graph.View
                 view.MouseLeftDownNode = viewModel.Model;
 
                 view.BeginDragNode();
+            });
+        }
+
+        protected override void OnMouseEnter(MouseEventArgs e)
+        {
+            RunOnNodeGraphView((view, viewModel) =>
+            {
+                if (view.IsSelecting || view.IsNodeDragging)
+                {
+                    return;
+                }
+
+                view.ViewModel?.Model.SetHighlightFromRootTo(viewModel.Model);
+            });
+            base.OnMouseEnter(e);
+        }
+
+        protected override void OnMouseLeave(MouseEventArgs e)
+        {
+            base.OnMouseLeave(e);
+
+            RunOnNodeGraphView((view, viewModel) =>
+            {
+                var model = view.ViewModel?.Model;
+                model?.Nodes.Each(x => x.ViewModel.IsHighlighted = false);
+                model?.Connectors.Each(x => x.ViewModel.IsHighlighted = false);
             });
         }
 

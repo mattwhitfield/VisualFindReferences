@@ -5,7 +5,7 @@ using VisualFindReferences.Core.Graph.View;
 
 namespace VisualFindReferences.Core.Graph.ViewModel
 {
-    public class NodeViewModel : ViewModelBase
+    public class NodeViewModel : ViewModelBase, IHighlightable
     {
         public NodeView? View { get; set; }
 
@@ -13,17 +13,33 @@ namespace VisualFindReferences.Core.Graph.ViewModel
 
         public ObservableCollection<Connector> OutboundConnectors { get; } = new ObservableCollection<Connector>();
 
-        private bool _IsSelected;
+
+        private bool _isSelected;
 
         public bool IsSelected
         {
-            get { return _IsSelected; }
+            get { return _isSelected; }
             set
             {
-                if (value != _IsSelected)
+                if (value != _isSelected)
                 {
-                    _IsSelected = value;
+                    _isSelected = value;
                     RaisePropertyChanged("IsSelected");
+                }
+            }
+        }
+
+        private bool _isHighlighted;
+
+        public bool IsHighlighted
+        {
+            get { return _isHighlighted; }
+            set
+            {
+                if (value != _isHighlighted)
+                {
+                    _isHighlighted = value;
+                    RaisePropertyChanged("IsHighlighted");
                 }
             }
         }

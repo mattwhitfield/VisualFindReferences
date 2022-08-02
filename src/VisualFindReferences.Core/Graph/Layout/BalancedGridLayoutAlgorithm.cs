@@ -214,11 +214,6 @@ namespace VisualFindReferences.Core.Graph.Layout
                         return yCoordinates;
                     }
 
-                    if (group.Count == 3)
-                    {
-                        System.Diagnostics.Debugger.Break();
-                    }
-
                     // for each node in the group
                     foreach (var node in group)
                     {

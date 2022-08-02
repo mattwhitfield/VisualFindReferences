@@ -14,9 +14,15 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type v:ConnectorView}">
                     <Path
+                        x:Name="ConnectorPath"
                         Data="{Binding Path=CurveData, RelativeSource={RelativeSource AncestorType={x:Type v:ConnectorView}}}"
                         Stroke="White"
                         StrokeThickness="2" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="ConnectorPath" Property="Stroke" Value="Green" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -104,6 +110,9 @@
                         <!--  Node Selection Trigger  -->
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="BorderSelection" Property="BorderBrush" Value="Orange" />
+                        </Trigger>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="BorderSelection" Property="BorderBrush" Value="Green" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="BlurEffect" Property="Visibility" Value="Visible" />
