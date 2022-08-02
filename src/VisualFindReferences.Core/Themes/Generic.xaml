@@ -28,6 +28,13 @@
         </Setter>
     </Style>
 
+    <DataTemplate x:Key="NodeViewTooltipTemplate" DataType="{x:Type v:NodeView}">
+        <StackPanel Orientation="Vertical">
+            <TextBlock Text="Hello!!" />
+            <TextBlock Text="{Binding Model.ContainerName, Mode=OneTime}" />
+        </StackPanel>
+    </DataTemplate>
+
     <!--  DefaultNodeView Style  -->
     <Style x:Key="DefaultNodeViewStyle" TargetType="{x:Type v:NodeView}">
         <Setter Property="Background" Value="{StaticResource NodeBackGroundColor}" />
@@ -36,9 +43,32 @@
         <Setter Property="Canvas.Left" Value="{Binding Model.X}" />
         <Setter Property="Canvas.Top" Value="{Binding Model.Y}" />
         <Setter Property="MinWidth" Value="120" />
+        <Setter Property="ToolTip" Value="{Binding}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type v:NodeView}">
+                    <ControlTemplate.Resources>
+                        <Style x:Key="{x:Type ToolTip}" TargetType="ToolTip">
+                            <Setter Property="OverridesDefaultStyle" Value="true" />
+                            <Setter Property="HasDropShadow" Value="True" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ToolTip">
+                                        <Border
+                                            Padding="4"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top"
+                                            Background="#D0202020"
+                                            BorderBrush="{StaticResource NodeBorderColor}"
+                                            BorderThickness="2"
+                                            CornerRadius="5">
+                                            <ContentControl Content="{TemplateBinding Content}" ContentTemplate="{StaticResource NodeViewTooltipTemplate}" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ControlTemplate.Resources>
                     <Grid>
                         <Border
                             x:Name="BlurEffect"
