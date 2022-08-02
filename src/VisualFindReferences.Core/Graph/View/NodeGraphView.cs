@@ -36,6 +36,9 @@ namespace VisualFindReferences.Core.Graph.View
 
         private FrameworkElement? _partNodeViewsContainer;
 
+        private int _lastWheelDirection;
+        private MouseArea _wheelConstrainedMouseArea;
+
         public bool IsNodeDragging { get; private set; }
         public bool AreNodesReallyDragged { get; private set; }
 
@@ -677,11 +680,25 @@ namespace VisualFindReferences.Core.Graph.View
             {
                 return;
             }
-
-            _dragBoundsTimer.Start();
+            
+            const int ConstraintBorder = 20;
 
             double newScale = ZoomAndPan.Scale;
-            newScale += 0.0 > e.Delta ? -0.05 : 0.05;
+            var direction = Math.Sign(e.Delta);
+
+            if (direction != _lastWheelDirection)
+            {
+                _wheelConstrainedMouseArea = MouseArea.None;
+                _lastWheelDirection = direction;
+            }
+
+            // get viewport in model co-ordinates before applying transform
+            var oldTopLeftInModelSpace = ZoomAndPan.MatrixInv.Transform(new Point(0, 0));
+            var oldBottomRigtInModelSpace = ZoomAndPan.MatrixInv.Transform(new Point(ActualWidth, ActualHeight));
+
+            newScale += direction * 0.05;
+
+            var oldConstraintBorderInModelSpace = ConstraintBorder / ZoomAndPan.Scale;
 
             Point vsZoomCenter = e.GetPosition(this);
             Point zoomCenter = ZoomAndPan.MatrixInv.Transform(vsZoomCenter);
@@ -693,6 +710,85 @@ namespace VisualFindReferences.Core.Graph.View
 
             ZoomAndPan.StartX -= vsDelta.X;
             ZoomAndPan.StartY -= vsDelta.Y;
+
+            // now work out wheel constraints if zooming in
+
+            if (direction < 0)
+            {
+                return;
+            }
+
+            // get viewport in model co-ordinates
+            var topLeftInModelSpace = ZoomAndPan.MatrixInv.Transform(new Point(0, 0));
+            var bottomRigtInModelSpace = ZoomAndPan.MatrixInv.Transform(new Point(ActualWidth, ActualHeight));
+
+            CalculateContentSize(ViewModel.Model, false, out var minX, out var maxX, out var minY, out var maxY);
+
+            var constraintBorderInModelSpace = ConstraintBorder / ZoomAndPan.Scale;
+
+            Console.WriteLine(constraintBorderInModelSpace);
+
+            var oldMinX = minX - oldConstraintBorderInModelSpace;
+            var oldMinY = minY - oldConstraintBorderInModelSpace;
+            var oldMaxX = maxX + oldConstraintBorderInModelSpace;
+            var oldMaxY = maxY + oldConstraintBorderInModelSpace;
+            minX -= constraintBorderInModelSpace;
+            minY -= constraintBorderInModelSpace;
+            maxX += constraintBorderInModelSpace;
+            maxY += constraintBorderInModelSpace;
+
+            // flag up to 1 x constraints && 1 y constraint as the displayed model crossed the edge of the viewport
+            var (constraintsSetX, constraintsSetY) = CountSetWheelConstraints();
+            if (constraintsSetX < 1 && topLeftInModelSpace.X > minX && oldTopLeftInModelSpace.X <= oldMinX)
+            {
+                _wheelConstrainedMouseArea |= MouseArea.Left;
+                constraintsSetX++;
+            }
+            if (constraintsSetY < 1 && topLeftInModelSpace.Y > minY && oldTopLeftInModelSpace.Y <= oldMinY)
+            {
+                _wheelConstrainedMouseArea |= MouseArea.Top;
+                constraintsSetY++;
+            }
+            if (constraintsSetX < 1 && bottomRigtInModelSpace.X < maxX && oldBottomRigtInModelSpace.X >= oldMaxX)
+            {
+                _wheelConstrainedMouseArea |= MouseArea.Right;
+            }
+            if (constraintsSetY < 1 && bottomRigtInModelSpace.Y < maxY && oldBottomRigtInModelSpace.Y >= oldMaxY)
+            {
+                _wheelConstrainedMouseArea |= MouseArea.Bottom;
+            }
+
+            // apply constraints
+            if ((_wheelConstrainedMouseArea & MouseArea.Left) > 0 && topLeftInModelSpace.X > minX)
+            {
+                ZoomAndPan.StartX -= topLeftInModelSpace.X - minX;
+            }
+            if ((_wheelConstrainedMouseArea & MouseArea.Top) > 0 && topLeftInModelSpace.Y > minY)
+            {
+                ZoomAndPan.StartY -= topLeftInModelSpace.Y - minY;
+            }
+            if ((_wheelConstrainedMouseArea & MouseArea.Right) > 0 && bottomRigtInModelSpace.X < maxX)
+            {
+                ZoomAndPan.StartX -= bottomRigtInModelSpace.X - maxX;
+            }
+            if ((_wheelConstrainedMouseArea & MouseArea.Bottom) > 0 && bottomRigtInModelSpace.Y < maxY)
+            {
+                ZoomAndPan.StartY -= bottomRigtInModelSpace.Y - maxY;
+            }
+
+        }
+
+        private (int, int) CountSetWheelConstraints()
+        {
+            int IsSet(MouseArea flag)
+            {
+                return (_wheelConstrainedMouseArea & flag) > 0 ? 1 : 0;
+            }
+
+            return (IsSet(MouseArea.Left) +
+                    IsSet(MouseArea.Right),
+                    IsSet(MouseArea.Top) +
+                    IsSet(MouseArea.Bottom));
         }
 
         private void DragBoundsTimerTick(object sender, EventArgs e)

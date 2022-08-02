@@ -4,74 +4,74 @@ namespace VisualFindReferences.Core.Graph.View
 {
     public class ZoomAndPan
     {
-        private double _ViewWidth;
+        private double _viewWidth;
 
         public double ViewWidth
         {
-            get { return _ViewWidth; }
+            get { return _viewWidth; }
             set
             {
-                if (value != _ViewWidth)
+                if (value != _viewWidth)
                 {
-                    _ViewWidth = value;
+                    _viewWidth = value;
                 }
             }
         }
 
-        private double _ViewHeight;
+        private double _viewHeight;
 
         public double ViewHeight
         {
-            get { return _ViewHeight; }
+            get { return _viewHeight; }
             set
             {
-                if (value != _ViewHeight)
+                if (value != _viewHeight)
                 {
-                    _ViewHeight = value;
+                    _viewHeight = value;
                 }
             }
         }
 
-        private double _StartX = 0.0;
+        private double _startX = 0.0;
 
         public double StartX
         {
-            get { return _StartX; }
+            get { return _startX; }
             set
             {
-                if (value != _StartX)
+                if (value != _startX)
                 {
-                    _StartX = value;
+                    _startX = value;
                     _UpdateTransform();
                 }
             }
         }
 
-        private double _StartY = 0.0;
+        private double _startY = 0.0;
 
         public double StartY
         {
-            get { return _StartY; }
+            get { return _startY; }
             set
             {
-                if (value != _StartY)
+                if (value != _startY)
                 {
-                    _StartY = value;
+                    _startY = value;
                     _UpdateTransform();
                 }
             }
         }
 
-        private double _Scale = 1.0;
+        private double _scale = 1.0;
 
         public double Scale
         {
-            get { return _Scale; }
+            get { return _scale; }
             set
             {
-                if (value != _Scale)
+                if (value != _scale)
                 {
-                    _Scale = value;
+                    _scale = value;
                     _UpdateTransform();
                 }
             }
@@ -100,8 +100,8 @@ namespace VisualFindReferences.Core.Graph.View
         private void _UpdateTransform()
         {
             Matrix newMatrix = Matrix.Identity;
-            newMatrix.Scale(_Scale, _Scale);
-            newMatrix.Translate(-_StartX, -_StartY);
+            newMatrix.Scale(_scale, _scale);
+            newMatrix.Translate(-_startX, -_startY);
 
             Matrix = newMatrix;
 
