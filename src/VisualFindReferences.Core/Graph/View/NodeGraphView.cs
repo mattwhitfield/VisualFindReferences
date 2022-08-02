@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -16,10 +15,7 @@ using VisualFindReferences.Core.Graph.ViewModel;
 
 namespace VisualFindReferences.Core.Graph.View
 {
-    [TemplatePart(Name = "PART_ConnectorViewsContainer", Type = typeof(FrameworkElement))]
-    [TemplatePart(Name = "PART_NodeViewsContainer", Type = typeof(FrameworkElement))]
-    [TemplatePart(Name = "PART_DragAndSelectionCanvas", Type = typeof(FrameworkElement))]
-    public class FlowChartView : ContentControl
+    public class NodeGraphView : ContentControl
     {
         private DispatcherTimer _dragBoundsTimer = new DispatcherTimer();
         private DispatcherTimer _animationTimer = new DispatcherTimer();
@@ -28,7 +24,7 @@ namespace VisualFindReferences.Core.Graph.View
         private IEasingFunction _animationEasing = new QuadraticEase();
         private GraphAnimation? _animation;
 
-        public FlowChartViewModel? ViewModel { get; private set; }
+        public NodeGraphViewModel? ViewModel { get; private set; }
 
         public ZoomAndPan ZoomAndPan { get; } = new ZoomAndPan();
 
@@ -51,17 +47,16 @@ namespace VisualFindReferences.Core.Graph.View
 
         private IList<Node>? _originalSelections;
 
-        static FlowChartView()
+        static NodeGraphView()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(FlowChartView), new FrameworkPropertyMetadata(typeof(FlowChartView)));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(NodeGraphView), new FrameworkPropertyMetadata(typeof(NodeGraphView)));
         }
 
-        public FlowChartView()
+        public NodeGraphView()
         {
             Focusable = true;
-            DataContextChanged += FlowChartView_DataContextChanged;
-
-            SizeChanged += FlowChartView_SizeChanged;
+            DataContextChanged += NodeGraphViewDataContextChanged;
+            SizeChanged += NodeGraphViewSizeChanged;
 
             _dragBoundsTimer.Interval = new TimeSpan(0, 0, 0, 0, 33);
             _dragBoundsTimer.Tick += DragBoundsTimerTick;
@@ -104,15 +99,15 @@ namespace VisualFindReferences.Core.Graph.View
             set { SetValue(SelectionVisibilityProperty, value); }
         }
 
-        public static readonly DependencyProperty SelectionWidthProperty = DependencyProperty.Register("SelectionWidth", typeof(double), typeof(FlowChartView), new PropertyMetadata(0.0));
+        public static readonly DependencyProperty SelectionWidthProperty = DependencyProperty.Register("SelectionWidth", typeof(double), typeof(NodeGraphView), new PropertyMetadata(0.0));
 
-        public static readonly DependencyProperty SelectionHeightProperty = DependencyProperty.Register("SelectionHeight", typeof(double), typeof(FlowChartView), new PropertyMetadata(0.0));
+        public static readonly DependencyProperty SelectionHeightProperty = DependencyProperty.Register("SelectionHeight", typeof(double), typeof(NodeGraphView), new PropertyMetadata(0.0));
 
-        public static readonly DependencyProperty SelectionStartYProperty = DependencyProperty.Register("SelectionStartY", typeof(double), typeof(FlowChartView), new PropertyMetadata(0.0));
+        public static readonly DependencyProperty SelectionStartYProperty = DependencyProperty.Register("SelectionStartY", typeof(double), typeof(NodeGraphView), new PropertyMetadata(0.0));
 
-        public static readonly DependencyProperty SelectionStartXProperty = DependencyProperty.Register("SelectionStartX", typeof(double), typeof(FlowChartView), new PropertyMetadata(0.0));
+        public static readonly DependencyProperty SelectionStartXProperty = DependencyProperty.Register("SelectionStartX", typeof(double), typeof(NodeGraphView), new PropertyMetadata(0.0));
 
-        public static readonly DependencyProperty SelectionVisibilityProperty = DependencyProperty.Register("SelectionVisibility", typeof(Visibility), typeof(FlowChartView), new PropertyMetadata(Visibility.Collapsed));
+        public static readonly DependencyProperty SelectionVisibilityProperty = DependencyProperty.Register("SelectionVisibility", typeof(Visibility), typeof(NodeGraphView), new PropertyMetadata(Visibility.Collapsed));
 
         public void StartAnimation(IEnumerable<Tuple<Node, double, double>> nodes, double scale, double startX, double startY)
         {
@@ -379,15 +374,15 @@ namespace VisualFindReferences.Core.Graph.View
             _partNodeViewsContainer = GetTemplateChild("PART_NodeViewsContainer") as FrameworkElement;
         }
 
-        private void FlowChartView_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void NodeGraphViewSizeChanged(object sender, SizeChangedEventArgs e)
         {
             ZoomAndPan.ViewWidth = ActualWidth;
             ZoomAndPan.ViewHeight = ActualHeight;
         }
 
-        private void FlowChartView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void NodeGraphViewDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            ViewModel = DataContext as FlowChartViewModel;
+            ViewModel = DataContext as NodeGraphViewModel;
             if (null == ViewModel)
                 return;
 
@@ -538,14 +533,11 @@ namespace VisualFindReferences.Core.Graph.View
             }
         }
 
-
         [DllImport("user32.dll")]
         public static extern void ClipCursor(ref System.Drawing.Rectangle rect);
 
         [DllImport("user32.dll")]
         public static extern void ClipCursor(IntPtr rect);
-
-
 
         private void BeginDragging()
         {
@@ -807,7 +799,7 @@ namespace VisualFindReferences.Core.Graph.View
             return area;
         }
 
-        private void CalculateContentSize(FlowChart flowChart, bool bOnlySelected, out double minX, out double maxX, out double minY, out double maxY)
+        private void CalculateContentSize(NodeGraph nodeGraph, bool bOnlySelected, out double minX, out double maxX, out double minY, out double maxY)
         {
             minX = double.MaxValue;
             maxX = double.MinValue;
@@ -815,10 +807,10 @@ namespace VisualFindReferences.Core.Graph.View
             maxY = double.MinValue;
 
             bool hasNodes = false;
-            foreach (var node in flowChart.Nodes)
+            foreach (var node in nodeGraph.Nodes)
             {
                 var nodeView = node.ViewModel.View;
-                if (node.Owner == flowChart)
+                if (node.Owner == nodeGraph)
                 {
                     if (bOnlySelected && !node.ViewModel.IsSelected)
                         continue;
@@ -836,7 +828,6 @@ namespace VisualFindReferences.Core.Graph.View
                 minX = maxX = minY = maxY = 0.0;
             }
         }
-
 
         public void FitNodesToView(bool bOnlySelected)
         {

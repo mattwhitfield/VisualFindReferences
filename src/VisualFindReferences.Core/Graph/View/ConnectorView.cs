@@ -61,9 +61,9 @@ namespace VisualFindReferences.Core.Graph.View
             }
 
             Connector connector = ViewModel.Model;
-            FlowChartView? flowChartView = connector.FlowChart.ViewModel.View;
+            NodeGraphView? nodeGraphView = connector.NodeGraph.ViewModel.View;
 
-            if (flowChartView == null || !flowChartView.IsAncestorOf(this))
+            if (nodeGraphView == null || !nodeGraphView.IsAncestorOf(this))
             {
                 return;
             }

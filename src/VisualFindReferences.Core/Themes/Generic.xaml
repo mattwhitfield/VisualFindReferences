@@ -4,7 +4,7 @@
     xmlns:v="clr-namespace:VisualFindReferences.Core.Graph.View">
 
     <!--  Background Colors  -->
-    <SolidColorBrush x:Key="FlowChartViewBackGroundColor" Color="#1E1E1E" />
+    <SolidColorBrush x:Key="ViewBackGroundColor" Color="#1E1E1E" />
     <SolidColorBrush x:Key="NodeBackGroundColor" Color="#121212" />
     <SolidColorBrush x:Key="NodeBorderColor" Color="#7160E8" />
 
@@ -114,12 +114,12 @@
         </Setter>
     </Style>
 
-    <!--  FlowChartView style  -->
-    <Style TargetType="{x:Type v:FlowChartView}">
-        <Setter Property="Background" Value="{StaticResource FlowChartViewBackGroundColor}" />
+    <!--  NodeGraphView style  -->
+    <Style TargetType="{x:Type v:NodeGraphView}">
+        <Setter Property="Background" Value="{StaticResource ViewBackGroundColor}" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type v:FlowChartView}">
+                <ControlTemplate TargetType="{x:Type v:NodeGraphView}">
                     <Border
                         x:Name="PART_Background"
                         Margin="{TemplateBinding Margin}"
@@ -152,20 +152,20 @@
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Top"
                                 IsHitTestVisible="False"
-                                Visibility="{Binding SelectionVisibility, RelativeSource={RelativeSource AncestorType={x:Type v:FlowChartView}}}">
+                                Visibility="{Binding SelectionVisibility, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}">
                                 <Border
-                                    Canvas.Left="{Binding SelectionStartX, RelativeSource={RelativeSource AncestorType={x:Type v:FlowChartView}}}"
-                                    Canvas.Top="{Binding SelectionStartY, RelativeSource={RelativeSource AncestorType={x:Type v:FlowChartView}}}"
-                                    Width="{Binding SelectionWidth, RelativeSource={RelativeSource AncestorType={x:Type v:FlowChartView}}}"
-                                    Height="{Binding SelectionHeight, RelativeSource={RelativeSource AncestorType={x:Type v:FlowChartView}}}"
+                                    Canvas.Left="{Binding SelectionStartX, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                    Canvas.Top="{Binding SelectionStartY, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                    Width="{Binding SelectionWidth, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                    Height="{Binding SelectionHeight, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
                                     BorderBrush="LightBlue"
                                     BorderThickness="2"
                                     Canvas.ZIndex="1" />
                                 <Border
-                                    Canvas.Left="{Binding SelectionStartX, RelativeSource={RelativeSource AncestorType={x:Type v:FlowChartView}}}"
-                                    Canvas.Top="{Binding SelectionStartY, RelativeSource={RelativeSource AncestorType={x:Type v:FlowChartView}}}"
-                                    Width="{Binding SelectionWidth, RelativeSource={RelativeSource AncestorType={x:Type v:FlowChartView}}}"
-                                    Height="{Binding SelectionHeight, RelativeSource={RelativeSource AncestorType={x:Type v:FlowChartView}}}"
+                                    Canvas.Left="{Binding SelectionStartX, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                    Canvas.Top="{Binding SelectionStartY, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                    Width="{Binding SelectionWidth, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                    Height="{Binding SelectionHeight, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
                                     Background="LightBlue"
                                     Canvas.ZIndex="0"
                                     Opacity="0.4" />

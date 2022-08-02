@@ -9,21 +9,21 @@ using VisualFindReferences.Core.Graph.View;
 
 namespace VisualFindReferences.Core.Graph.ViewModel
 {
-    public class FlowChartViewModel : ViewModelBase
+    public class NodeGraphViewModel : ViewModelBase
     {
-        public FlowChartView? View { get; set; }
+        public NodeGraphView? View { get; set; }
 
-        public FlowChart Model { get; }
+        public NodeGraph Model { get; }
 
         public ObservableCollection<NodeViewModel> NodeViewModels { get; } = new ObservableCollection<NodeViewModel>();
 
         public ObservableCollection<ConnectorViewModel> ConnectorViewModels { get; } = new ObservableCollection<ConnectorViewModel>();
 
-        public FlowChartViewModel(FlowChart flowChart) : base(flowChart)
+        public NodeGraphViewModel(NodeGraph nodeGraph) : base(nodeGraph)
         {
-            Model = flowChart;
-            flowChart.Nodes.CollectionChanged += Nodes_CollectionChanged;
-            flowChart.Connectors.CollectionChanged += Connectors_CollectionChanged;
+            Model = nodeGraph;
+            nodeGraph.Nodes.CollectionChanged += Nodes_CollectionChanged;
+            nodeGraph.Connectors.CollectionChanged += Connectors_CollectionChanged;
         }
 
         private void Connectors_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

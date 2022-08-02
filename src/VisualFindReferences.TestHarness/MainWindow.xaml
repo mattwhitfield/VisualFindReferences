@@ -24,6 +24,6 @@
         </ContextMenu>
     </Window.Resources>
     <Grid>
-        <ngv:FlowChartView DataContext="{Binding Path=FlowChartViewModel, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}" NodeContextMenuRequested="FlowChartView_NodeContextMenuRequested" />
+        <ngv:NodeGraphView DataContext="{Binding Path=NodeGraphViewModel, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}" NodeContextMenuRequested="NodeGraphViewNodeContextMenuRequested" />
     </Grid>
 </Window>

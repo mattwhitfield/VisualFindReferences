@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisualFindReferences.Core",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualFindReferences.TestHarness", "VisualFindReferences.TestHarness\VisualFindReferences.TestHarness.csproj", "{6FE70493-2709-4A9D-B2D4-B88C35689AC7}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisualFindReferences.Core.Tests", "VisualFindReferences.Core.Tests\VisualFindReferences.Core.Tests.csproj", "{77246503-0C58-4753-B869-A87B9D047F91}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{6FE70493-2709-4A9D-B2D4-B88C35689AC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FE70493-2709-4A9D-B2D4-B88C35689AC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FE70493-2709-4A9D-B2D4-B88C35689AC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77246503-0C58-4753-B869-A87B9D047F91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77246503-0C58-4753-B869-A87B9D047F91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77246503-0C58-4753-B869-A87B9D047F91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77246503-0C58-4753-B869-A87B9D047F91}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

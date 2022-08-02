@@ -126,7 +126,7 @@ namespace VisualFindReferences.Core.Graph.Layout
             return force;
         }
 
-        protected int XComparison(RectangleWrapper<Node> r1, RectangleWrapper<Node> r2)
+        private int XComparison(RectangleWrapper<Node> r1, RectangleWrapper<Node> r2)
         {
             double r1CenterX = r1.CenterX;
             double r2CenterX = r2.CenterX;
@@ -138,55 +138,7 @@ namespace VisualFindReferences.Core.Graph.Layout
             return 0;
         }
 
-        protected void Horizontal()
-        {
-            WrappedRectangles.Sort(XComparison);
-            int i = 0;
-            int n = WrappedRectangles.Count;
-            while (i < n)
-            {
-                // x_i = x_{i+1} = ... = x_k
-                int k = i;
-                RectangleWrapper<Node> u = WrappedRectangles[i];
-                for (int j = i + 1; j < n; ++j)
-                {
-                    RectangleWrapper<Node> v = WrappedRectangles[j];
-                    if (MathUtils.NearEqual(u.CenterX, v.CenterX))
-                    {
-                        u = v;
-                        k = j;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                // delta = max(0, max{f.x(m,j)|i<=m<=k<j<n})
-                double delta = 0;
-                for (int m = i; m <= k; ++m)
-                {
-                    for (int j = k + 1; j < n; ++j)
-                    {
-                        Vector force = Force(WrappedRectangles[m].Rectangle, WrappedRectangles[j].Rectangle);
-                        if (force.X > delta)
-                        {
-                            delta = force.X;
-                        }
-                    }
-                }
-
-                for (int j = k + 1; j < n; ++j)
-                {
-                    RectangleWrapper<Node> r = WrappedRectangles[j];
-                    r.Rectangle.Offset(delta, 0);
-                }
-
-                i = k + 1;
-            }
-        }
-
-        protected double HorizontalImproved()
+        private double HorizontalImproved()
         {
             WrappedRectangles.Sort(XComparison);
             int i = 0;
@@ -287,7 +239,7 @@ namespace VisualFindReferences.Core.Graph.Layout
             return cost;
         }
 
-        protected int YComparison(
+        private int YComparison(
             RectangleWrapper<Node> r1,
             RectangleWrapper<Node> r2)
         {
@@ -301,55 +253,7 @@ namespace VisualFindReferences.Core.Graph.Layout
             return 0;
         }
 
-        protected void Vertical()
-        {
-            WrappedRectangles.Sort(YComparison);
-            int i = 0;
-            int n = WrappedRectangles.Count;
-            while (i < n)
-            {
-                // y_i = y_{i+1} = ... = y_k
-                int k = i;
-                RectangleWrapper<Node> u = WrappedRectangles[i];
-                for (int j = i; j < n; ++j)
-                {
-                    RectangleWrapper<Node> v = WrappedRectangles[j];
-                    if (MathUtils.NearEqual(u.CenterY, v.CenterY))
-                    {
-                        u = v;
-                        k = j;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                // delta = max(0, max{f.y(m,j)|i<=m<=k<j<n})
-                double delta = 0;
-                for (int m = i; m <= k; ++m)
-                {
-                    for (int j = k + 1; j < n; ++j)
-                    {
-                        Vector force = Force2(WrappedRectangles[m].Rectangle, WrappedRectangles[j].Rectangle);
-                        if (force.Y > delta)
-                        {
-                            delta = force.Y;
-                        }
-                    }
-                }
-
-                for (int j = k + 1; j < n; ++j)
-                {
-                    RectangleWrapper<Node> r = WrappedRectangles[j];
-                    r.Rectangle.Offset(0, delta);
-                }
-
-                i = k + 1;
-            }
-        }
-
-        protected double VerticalImproved()
+        private double VerticalImproved()
         {
             WrappedRectangles.Sort(YComparison);
             int i = 0;

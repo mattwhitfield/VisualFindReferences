@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows;
 using VisualFindReferences.Core.Graph.Helper;
 using VisualFindReferences.Core.Graph.View;
 

@@ -4,7 +4,7 @@ namespace VisualFindReferences.Core.Graph.Model
 {
     public class Connector : ModelBase
     {
-        public FlowChart FlowChart { get; }
+        public NodeGraph NodeGraph { get; }
 
         public ConnectorViewModel ViewModel { get; }
 
@@ -12,9 +12,9 @@ namespace VisualFindReferences.Core.Graph.Model
 
         public Node EndNode { get; }
 
-        public Connector(FlowChart flowChart, Node startNode, Node endNode)
+        public Connector(NodeGraph nodeGraph, Node startNode, Node endNode)
         {
-            FlowChart = flowChart;
+            NodeGraph = nodeGraph;
             StartNode = startNode;
             EndNode = endNode;
             ViewModel = new ConnectorViewModel(this);

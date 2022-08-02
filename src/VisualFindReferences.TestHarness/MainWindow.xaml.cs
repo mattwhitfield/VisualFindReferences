@@ -13,14 +13,14 @@ namespace VisualFindReferences.TestHarness
     /// </summary>
     public partial class MainWindow : Window
     {
-        public FlowChartViewModel FlowChartViewModel
+        public NodeGraphViewModel NodeGraphViewModel
         {
-            get { return (FlowChartViewModel)GetValue(FlowChartViewModelProperty); }
-            set { SetValue(FlowChartViewModelProperty, value); }
+            get { return (NodeGraphViewModel)GetValue(NodeGraphViewModelProperty); }
+            set { SetValue(NodeGraphViewModelProperty, value); }
         }
 
-        public static readonly DependencyProperty FlowChartViewModelProperty =
-            DependencyProperty.Register("FlowChartViewModel", typeof(FlowChartViewModel), typeof(MainWindow), new PropertyMetadata(null));
+        public static readonly DependencyProperty NodeGraphViewModelProperty =
+            DependencyProperty.Register("NodeGraphViewModel", typeof(NodeGraphViewModel), typeof(MainWindow), new PropertyMetadata(null));
 
         private Node _contextMenuNode;
 
@@ -38,38 +38,39 @@ namespace VisualFindReferences.TestHarness
         {
             if (e.Key == System.Windows.Input.Key.P)
             {
-                var existing = FlowChartViewModel.NodeViewModels[r.Next(FlowChartViewModel.NodeViewModels.Count)].Model;
-                var flowChart = FlowChartViewModel.Model;
+                var existing = NodeGraphViewModel.NodeViewModels[r.Next(NodeGraphViewModel.NodeViewModels.Count)].Model;
+                var nodeGraph = NodeGraphViewModel.Model;
 
-                var n1 = CreateNode(flowChart, existing.X, existing.Y);
-                var n2 = CreateNode(flowChart, existing.X, existing.Y);
+                var n1 = CreateNode(nodeGraph, existing.X, existing.Y);
+                var n2 = CreateNode(nodeGraph, existing.X, existing.Y);
 
-                flowChart.Nodes.Add(n1);
-                flowChart.Nodes.Add(n2);
+                nodeGraph.Nodes.Add(n1);
+                nodeGraph.Nodes.Add(n2);
 
-                var c1 = new Connector(flowChart, existing, n1);
-                var c2 = new Connector(flowChart, existing, n2);
+                var c1 = new Connector(nodeGraph, existing, n1);
+                var c2 = new Connector(nodeGraph, existing, n2);
 
-                flowChart.Connectors.Add(c1);
-                flowChart.Connectors.Add(c2);
+                nodeGraph.Connectors.Add(c1);
+                nodeGraph.Connectors.Add(c2);
 
-                var view = FlowChartViewModel.View;
+                var view = NodeGraphViewModel.View;
                 var nodes = new List<Tuple<Node, double, double>>();
                 nodes.Add(Tuple.Create(n1, n1.X + 200, n1.Y - 50));
                 nodes.Add(Tuple.Create(n2, n2.X + 200, n2.Y + 50));
-                FlowChartViewModel.View.StartAnimation(nodes, view.ZoomAndPan.Scale + (r.NextDouble() - 0.5), view.ZoomAndPan.StartX + ((r.NextDouble() - 0.5) * 20), view.ZoomAndPan.StartY + ((r.NextDouble() - 0.5) * 20));
+                NodeGraphViewModel.View.StartAnimation(nodes, view.ZoomAndPan.Scale + (r.NextDouble() - 0.5), view.ZoomAndPan.StartX + ((r.NextDouble() - 0.5) * 20), view.ZoomAndPan.StartY + ((r.NextDouble() - 0.5) * 20));
             }
 
             if (e.Key == System.Windows.Input.Key.L)
             {
                 var dictionary = new Dictionary<Node, Core.Graph.Layout.Point>();
-                foreach(var node in FlowChartViewModel.Model.Nodes)
+                foreach(var node in NodeGraphViewModel.Model.Nodes)
                 {
                     dictionary[node] = new Core.Graph.Layout.Point(node.X, node.Y);
                 }
-                var algo = new FRLayoutAlgorithm(FlowChartViewModel.Model, dictionary);
-                algo.Initialize();
-                algo.InternalCompute();
+                //var algo = new FRLayoutAlgorithm(NodeGraphViewModel.Model, dictionary);
+                //var algo = new HorizontalBalancedGridLayoutAlgorithm(NodeGraphViewModel.Model, dictionary);
+                var algo = new VerticalBalancedGridLayoutAlgorithm(NodeGraphViewModel.Model, dictionary);
+                algo.Layout();
 
                 var fsaDictionary = new Dictionary<Node, Core.Graph.Layout.Rect>();
                 foreach (var pair in dictionary)
@@ -86,56 +87,91 @@ namespace VisualFindReferences.TestHarness
                 //    pair.Key.Y = pair.Value.Y;
                 //}
 
-                var view = FlowChartViewModel.View;
+                var view = NodeGraphViewModel.View;
                 var nodes = new List<Tuple<Node, double, double>>();
 
                 foreach (var pair in fsaDictionary)
                 {
                     nodes.Add(Tuple.Create(pair.Key, pair.Value.X, pair.Value.Y));
                 }
-                FlowChartViewModel.View.StartAnimation(nodes, view.ZoomAndPan.Scale, view.ZoomAndPan.StartX, view.ZoomAndPan.StartY);
+                NodeGraphViewModel.View.StartAnimation(nodes, view.ZoomAndPan.Scale, view.ZoomAndPan.StartX, view.ZoomAndPan.StartY);
             }
         }
 
-        private Node CreateNode(FlowChart flowChart, double x, double y)
+        private Node CreateNode(NodeGraph nodeGraph, double x, double y, string text = "")
         {
-            switch (r.Next(6))
+            Node GetNode()
             {
-                case 0: return new MethodNode(flowChart, "Method", "MyProgram.Stuff.MethodType", x, y);
-                case 1: return new LocalMethodNode(flowChart, "LocalMethod", "MyProgram.Stuff.LocalMethodType", x, y);
-                case 2: return new PropertyNode(flowChart, "Property", "MyProgram.Stuff.PropertyType", x, y);
-                case 3: return new LambdaNode(flowChart, "Lambda", "MyProgram.Stuff.LambdaNode", x, y);
-                case 4: return new OperatorNode(flowChart, "Operator", "MyProgram.Stuff.OperatorType", x, y);
-                default: return new FieldInitializerNode(flowChart, "FieldInitializer", "MyProgram.Stuff.FieldInitializerType", x, y);
+                switch (r.Next(6))
+                {
+                    case 0: return new MethodNode(nodeGraph, text + "Method", "MyProgram.Stuff.MethodType", x, y);
+                    case 1: return new LocalMethodNode(nodeGraph, text + "LocalMethod", "MyProgram.Stuff.LocalMethodType", x, y);
+                    case 2: return new PropertyNode(nodeGraph, text + "Property", "MyProgram.Stuff.PropertyType", x, y);
+                    case 3: return new LambdaNode(nodeGraph, text + "Lambda", "MyProgram.Stuff.LambdaNode", x, y);
+                    case 4: return new OperatorNode(nodeGraph, text + "Operator", "MyProgram.Stuff.OperatorType", x, y);
+                    default: return new FieldInitializerNode(nodeGraph, text + "FieldInitializer", "MyProgram.Stuff.FieldInitializerType", x, y);
+                }
             }
+            var node = GetNode();
+            nodeGraph.Nodes.Add(node);
+            return node;
         }
+
+        private Node CreateNode(NodeGraph nodeGraph, int num)
+        {
+            var x = r.NextDouble() * 500;
+            var y = r.NextDouble() * 500;
+
+            return CreateNode(nodeGraph, x, y, num + ": ");
+        }
+
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            FlowChart flowChart = new FlowChart();
-            FlowChartViewModel = flowChart.ViewModel;
+            NodeGraph nodeGraph = new NodeGraph();
+            NodeGraphViewModel = nodeGraph.ViewModel;
 
-            var n1 = CreateNode(flowChart, 100, 100);
-            var n2 = CreateNode(flowChart, 300, 100);
-            var n3 = CreateNode(flowChart, 100, 160);
+            bool includeBack = true;
 
-            flowChart.Nodes.Add(n1);
-            flowChart.Nodes.Add(n2);
-            flowChart.Nodes.Add(n3);
+            var node1 = CreateNode(nodeGraph, 1);
+            var node2 = CreateNode(nodeGraph, 2);
+            var node3 = CreateNode(nodeGraph, 3);
+            var node4 = CreateNode(nodeGraph, 4);
+            var node5 = CreateNode(nodeGraph, 5);
+            var node6 = CreateNode(nodeGraph, 6);
+            var node7 = CreateNode(nodeGraph, 7);
+            var node8 = CreateNode(nodeGraph, 8);
+            var node9 = CreateNode(nodeGraph, 9);
+            var node10 = CreateNode(nodeGraph, 10);
 
-            var c1 = new Connector(flowChart, n1, n2);
-            var c2 = new Connector(flowChart, n1, n3);
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node1, node5));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node1, node7));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node7, node4));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node7, node6));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node6, node3));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node5, node2));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node4, node5));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node3));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node5, node8));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node9));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node10));
 
-            flowChart.Connectors.Add(c1);
-            flowChart.Connectors.Add(c2);
+            if (includeBack)
+            {
+                var node11 = CreateNode(nodeGraph, 11);
+                var node12 = CreateNode(nodeGraph, 12);
+                nodeGraph.Connectors.Add(new Connector(nodeGraph, node11, node2));
+                nodeGraph.Connectors.Add(new Connector(nodeGraph, node12, node2));
+            }
+
         }
 
         private void DeleteItem(object sender, RoutedEventArgs e)
         {
-            FlowChartViewModel.Model.Nodes.Remove(_contextMenuNode);
+            NodeGraphViewModel.Model.Nodes.Remove(_contextMenuNode);
         }
 
-        private void FlowChartView_NodeContextMenuRequested(object sender, Core.Graph.View.ContextMenuEventArgs e)
+        private void NodeGraphViewNodeContextMenuRequested(object sender, Core.Graph.View.ContextMenuEventArgs e)
         {
             _contextMenuNode = e.Node;
             e.ContextMenu = this.FindResource("NodeContextMenu") as ContextMenu;

@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.LanguageServices;
-    using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Threading;
     using VisualFindReferences.Views;
 

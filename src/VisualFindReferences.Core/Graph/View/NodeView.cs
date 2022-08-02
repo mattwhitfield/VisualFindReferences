@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Threading;
 using VisualFindReferences.Core.Graph.Model;
 using VisualFindReferences.Core.Graph.ViewModel;
 
@@ -55,19 +52,24 @@ namespace VisualFindReferences.Core.Graph.View
             SynchronizeProperties();
         }
 
+        private bool RunOnNodeGraphView(Action<NodeGraphView, NodeViewModel> action)
+        {
+            var viewModel = ViewModel;
+            var view = viewModel?.Model.Owner.ViewModel.View;
+
+            if (view != null && viewModel != null)
+            {
+                action(view, viewModel);
+            }
+
+            return view != null;
+        }
+
         protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonUp(e);
 
-            if (ViewModel == null)
-            {
-                return;
-            }
-
-            FlowChart flowChart = ViewModel.Model.Owner;
-            var view = flowChart.ViewModel.View;
-
-            if (view != null)
+            e.Handled = RunOnNodeGraphView((view, viewModel) =>
             {
                 if (view.IsSelecting)
                 {
@@ -75,9 +77,9 @@ namespace VisualFindReferences.Core.Graph.View
                 }
 
                 if (!view.AreNodesReallyDragged &&
-                    view.MouseLeftDownNode == ViewModel.Model)
+                    view.MouseLeftDownNode == viewModel.Model)
                 {
-                    view.TrySelection(ViewModel.Model,
+                    view.TrySelection(viewModel.Model,
                         Keyboard.IsKeyDown(Key.LeftCtrl),
                         Keyboard.IsKeyDown(Key.LeftShift),
                         Keyboard.IsKeyDown(Key.LeftAlt));
@@ -86,58 +88,38 @@ namespace VisualFindReferences.Core.Graph.View
                 view.EndDragNode();
 
                 view.MouseLeftDownNode = null;
-
-                e.Handled = true;
-            }
+            });
         }
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
 
-            if (ViewModel == null)
+            e.Handled = RunOnNodeGraphView((view, viewModel) =>
             {
-                return;
-            }
+                Keyboard.Focus(view);
 
-            FlowChart flowChart = ViewModel.Model.Owner;
-            FlowChartView? flowChartView = flowChart.ViewModel.View;
+                view.EndDragNode();
+                view.EndDragSelection(false);
 
-            if (flowChartView == null)
-            {
-                return;
-            }
+                view.MouseLeftDownNode = viewModel.Model;
 
-            Keyboard.Focus(flowChartView);
-
-            flowChartView.EndDragNode();
-            flowChartView.EndDragSelection(false);
-
-            flowChartView.MouseLeftDownNode = ViewModel.Model;
-
-            flowChartView.BeginDragNode();
-
-            e.Handled = true;
+                view.BeginDragNode();
+            });
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
 
-            FlowChartView? flowChartView = ViewModel?.Model.Owner.ViewModel.View;
-
-            if (flowChartView == null || ViewModel == null)
+            RunOnNodeGraphView((view, viewModel) =>
             {
-                return;
-            }
-
-            if (flowChartView.IsNodeDragging &&
-                flowChartView.MouseLeftDownNode == ViewModel.Model &&
-                !IsSelected)
-            {
-                Node node = ViewModel.Model;
-                flowChartView.TrySelection(node, false, false, false);
-            }
+                if (view.IsNodeDragging && view.MouseLeftDownNode == viewModel.Model && !IsSelected)
+                {
+                    Node node = viewModel.Model;
+                    view.TrySelection(node, false, false, false);
+                }
+            });
         }
     }
 }

@@ -4,34 +4,25 @@ using VisualFindReferences.Core.Graph.Model;
 
 namespace VisualFindReferences.Core.Graph.Layout
 {
-    public class FRLayoutAlgorithm
+    public class FRLayoutAlgorithm : LayoutAlgorithm
     {
         private double _temperature;
 
         private double _maxWidth = double.PositiveInfinity;
         private double _maxHeight = double.PositiveInfinity;
 
-        private FlowChart _visitedGraph;
-
         private FRLayoutParameters _parameters = new FRLayoutParameters();
 
-        public FRLayoutAlgorithm(FlowChart visitedGraph, IDictionary<Node, Point> verticesPositions)
-        {
-            _visitedGraph = visitedGraph;
-            VerticesPositions = verticesPositions;
-        }
+        public FRLayoutAlgorithm(NodeGraph visitedGraph, IDictionary<Node, Point> verticesPositions) : base(visitedGraph, verticesPositions)
+        { }
 
         private double _constantOfRepulsion;
         private double _constantOfAttraction;
 
-        public IDictionary<Node, Point> VerticesPositions { get; }
-
-        private Random _random = new Random();
-
-        public void Initialize()
+        protected override void Initialize()
         {
             // Initialize with random position
-            foreach (var vertex in _visitedGraph.Nodes)
+            foreach (var vertex in VisitedGraph.Nodes)
             {
                 // For vertices without assigned position
                 if (!VerticesPositions.ContainsKey(vertex))
@@ -39,17 +30,17 @@ namespace VisualFindReferences.Core.Graph.Layout
                     VerticesPositions.Add(
                         vertex,
                         new Point(
-                            Math.Max(double.Epsilon, _random.NextDouble() * 10),
-                            Math.Max(double.Epsilon, _random.NextDouble() * 10)));
+                            Math.Max(double.Epsilon, Random.NextDouble() * 10),
+                            Math.Max(double.Epsilon, Random.NextDouble() * 10)));
                 }
             }
 
-            _parameters.VertexCount = _visitedGraph.Nodes.Count;
+            _parameters.VertexCount = VisitedGraph.Nodes.Count;
             _constantOfRepulsion = _parameters.ConstantOfRepulsion;
             _constantOfAttraction = _parameters.ConstantOfAttraction;
         }
 
-        public void InternalCompute()
+        protected override void InternalCompute()
         {
             // Actual temperature of the 'mass'. Used for cooling.
             _temperature = _parameters.InitialTemperature;
@@ -63,17 +54,17 @@ namespace VisualFindReferences.Core.Graph.Layout
             }
         }
 
-        protected void IterateOne()
+        private void IterateOne()
         {
             // Create the forces (zero forces)
             var forces = new Dictionary<Node, Vector>();
 
-            foreach (Node v in _visitedGraph.Nodes)
+            foreach (Node v in VisitedGraph.Nodes)
             {
                 var force = default(Vector);
 
                 Point posV = VerticesPositions[v];
-                foreach (Node u in _visitedGraph.Nodes)
+                foreach (Node u in VisitedGraph.Nodes)
                 {
                     // Doesn't repulse itself
                     if (EqualityComparer<Node>.Default.Equals(u, v))
@@ -90,7 +81,7 @@ namespace VisualFindReferences.Core.Graph.Layout
                 forces[v] = force;
             }
 
-            foreach (Connector edge in _visitedGraph.Connectors)
+            foreach (Connector edge in VisitedGraph.Connectors)
             {
                 Node source = edge.StartNode;
                 Node target = edge.EndNode;
@@ -104,7 +95,7 @@ namespace VisualFindReferences.Core.Graph.Layout
                 forces[target] += delta;
             }
 
-            foreach (Node vertex in _visitedGraph.Nodes)
+            foreach (Node vertex in VisitedGraph.Nodes)
             {
                 Point position = VerticesPositions[vertex];
 
