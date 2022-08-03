@@ -15,6 +15,7 @@ namespace VisualFindReferences.Core.Graph.Layout
         private HashSet<Node> _disconnectedNodes = new HashSet<Node>();
 
         private Dictionary<Node, int> _nodeGroupsByNode = new Dictionary<Node, int>();
+        private Dictionary<Node, int> _passesByNode = new Dictionary<Node, int>();
         private Dictionary<int, List<Node>> _nodeGroups = new Dictionary<int, List<Node>>();
         private Dictionary<int, List<Node>> _outputGroups = new Dictionary<int, List<Node>>();
 
@@ -63,39 +64,62 @@ namespace VisualFindReferences.Core.Graph.Layout
             var leftQueue = new Queue<Tuple<Node, int>>();
             rightQueue.Enqueue(Tuple.Create(VisitedGraph.Nodes[0], 0));
 
-            while (rightQueue.Count > 0)
+            int pass = 1;
+            while (leftQueue.Count > 0 || rightQueue.Count > 0)
             {
-                var (currentNode, currentPosition) = rightQueue.Dequeue();
-                if (!laidOutNodes.Add(currentNode))
+                while (rightQueue.Count > 0)
                 {
-                    continue;
+                    var (currentNode, currentPosition) = rightQueue.Dequeue();
+                    if (!laidOutNodes.Add(currentNode))
+                    {
+                        continue;
+                    }
+                    GetNodeGroup(currentPosition).Add(currentNode);
+                    _passesByNode[currentNode] = pass;
+
+                    // get nodes to the left and right of the current node
+                    var (leftNodes, rightNodes) = GetLeftAndRightNodes(currentNode);
+
+                    var rightPosition = currentPosition + 1;
+                    foreach (var rightNode in rightNodes)
+                    {
+                        rightQueue.Enqueue(Tuple.Create(rightNode, rightPosition));
+                    }
+
+                    var leftPosition = currentPosition - 1;
+                    foreach (var leftNode in leftNodes)
+                    {
+                        leftQueue.Enqueue(Tuple.Create(leftNode, leftPosition));
+                    }
                 }
-                GetNodeGroup(currentPosition).Add(currentNode);
 
-                // get nodes to the left and right of the current node
-                var (leftNodes, rightNodes) = GetLeftAndRightNodes(currentNode);
-
-                var rightPosition = currentPosition + 1;
-                foreach (var rightNode in rightNodes)
+                while (leftQueue.Count > 0)
                 {
-                    rightQueue.Enqueue(Tuple.Create(rightNode, rightPosition));
+                    var (currentNode, currentPosition) = leftQueue.Dequeue();
+                    if (!laidOutNodes.Add(currentNode))
+                    {
+                        continue;
+                    }
+                    GetNodeGroup(currentPosition).Add(currentNode);
+                    _passesByNode[currentNode] = pass;
+
+                    // get nodes to the left and right of the current node
+                    var (leftNodes, rightNodes) = GetLeftAndRightNodes(currentNode);
+
+                    var rightPosition = currentPosition + 1;
+                    foreach (var rightNode in rightNodes)
+                    {
+                        rightQueue.Enqueue(Tuple.Create(rightNode, rightPosition));
+                    }
+
+                    var leftPosition = currentPosition - 1;
+                    foreach (var leftNode in leftNodes)
+                    {
+                        leftQueue.Enqueue(Tuple.Create(leftNode, leftPosition));
+                    }
                 }
 
-                var leftPosition = currentPosition - 1;
-                foreach (var leftNode in leftNodes)
-                {
-                    leftQueue.Enqueue(Tuple.Create(leftNode, leftPosition));
-                }
-            }
-
-            while (leftQueue.Count > 0)
-            {
-                var (currentNode, currentPosition) = leftQueue.Dequeue();
-                if (!laidOutNodes.Add(currentNode))
-                {
-                    continue;
-                }
-                GetNodeGroup(currentPosition).Add(currentNode);
+                pass += 2;
             }
 
             foreach (var group in _nodeGroups)
@@ -172,6 +196,7 @@ namespace VisualFindReferences.Core.Graph.Layout
             var minGroup = _nodeGroups.Keys.Min();
             var maxGroup = _nodeGroups.Keys.Max();
             var laidOutNodes = new HashSet<Node>();
+            var nodesToLayout = _nodeGroups.Select(x => x.Value.Count).Sum();
 
             // as we are going left to right, we consider links to the left as we place each node - we build up the table of links to compare
             // to as we place the links
@@ -180,9 +205,10 @@ namespace VisualFindReferences.Core.Graph.Layout
             // we make two passes, on the first pass we consider only nodes that are connected to the previous group
             // on the second pass, we only have nodes that are only connected to the next group to consider
 
-            for (int pass = 1; pass <= 2; pass++)
+
+            for (int pass = 1; laidOutNodes.Count < nodesToLayout; pass++)
             {
-                var direction = pass == 1 ? 1 : -1;
+                var direction = pass % 2 == 1 ? 1 : -1;
                 foreach (var pair in _nodeGroups.OrderBy(x => x.Key))
                 {
                     var groupNum = pair.Key;
@@ -220,14 +246,19 @@ namespace VisualFindReferences.Core.Graph.Layout
                         var leftLinks = getLinks(node);
                         var isConnectedToPreviousGroup = leftLinks.Any();
 
-                        // skip this node if it's not connected to the left and we're on the first pass
-                        if (pass == 1 && !isConnectedToPreviousGroup)
+                        // skip this node if it's not connected to the left and we're on a foward pass
+                        if (direction == 1 && !isConnectedToPreviousGroup)
                         {
                             continue;
                         }
 
                         // skip any node we have previously laid out
                         if (laidOutNodes.Contains(node))
+                        {
+                            continue;
+                        }
+
+                        if (_passesByNode[node] > pass)
                         {
                             continue;
                         }

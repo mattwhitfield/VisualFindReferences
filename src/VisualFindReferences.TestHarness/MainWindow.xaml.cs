@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using VisualFindReferences.Core.Graph.Layout;
@@ -38,7 +39,11 @@ namespace VisualFindReferences.TestHarness
         {
             if (e.Key == System.Windows.Input.Key.P)
             {
-                var existing = NodeGraphViewModel.NodeViewModels[r.Next(NodeGraphViewModel.NodeViewModels.Count)].Model;
+                var existing = NodeGraphViewModel.NodeViewModels.FirstOrDefault(x => x.IsSelected)?.Model;
+                if (existing == null)
+                {
+                    existing = NodeGraphViewModel.NodeViewModels[r.Next(NodeGraphViewModel.NodeViewModels.Count)].Model;
+                }
                 var nodeGraph = NodeGraphViewModel.Model;
 
                 var n1 = CreateNode(nodeGraph, existing.X, existing.Y);
