@@ -282,13 +282,8 @@ namespace VisualFindReferences.Core.Graph.View
 
                 bool isInOriginalSelection = _originalSelections != null && _originalSelections.Contains(node);
 
-                bool isIncluded =
-                    nodeStart.X >= selectionStart.X &&
-                    nodeStart.Y >= selectionStart.Y &&
-                    nodeEnd.X <= selectionEnd.X &&
-                    nodeEnd.Y <= selectionEnd.Y;
-
-                var isSelected = isIncluded;
+                var isSelected = nodeStart.X < selectionEnd.X && nodeEnd.X > selectionStart.X &&
+                                 nodeStart.Y < selectionEnd.Y && nodeEnd.Y > selectionStart.Y;
 
                 if (!isSelected)
                 {

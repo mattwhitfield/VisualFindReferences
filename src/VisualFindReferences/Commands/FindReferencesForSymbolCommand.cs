@@ -2,6 +2,9 @@
 {
     using System;
     using System.ComponentModel.Design;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using Microsoft.CodeAnalysis.FindSymbols;
     using Microsoft.CodeAnalysis.Text;
     using Microsoft.VisualStudio.Shell;
     using VisualFindReferences;
@@ -91,6 +94,25 @@
 
                 var methodTask = _package.JoinableTaskFactory.RunAsync(async () => await TextViewHelper.GetTargetSymbolAsync(textView).ConfigureAwait(true));
                 var tuple = methodTask.Join();
+
+                _ = _package.JoinableTaskFactory.RunAsync(
+                    () => Attempt.ActionAsync(
+                        async () =>
+                        {
+                            var (syntaxNode, semanticModel) = await TextViewHelper.GetTargetSymbolAsync(textView).ConfigureAwait(true);
+
+                            if (syntaxNode != null)
+                            {
+                                var declaredSymbol = semanticModel.GetDeclaredSymbol(syntaxNode);
+                                if (declaredSymbol != null)
+                                {
+                                    var list = await SymbolFinder.FindReferencesAsync(declaredSymbol, document.Project.Solution).ConfigureAwait(true);
+                                    MethodDeclarationSyntax s;
+                                    BlockSyntax b;
+
+                                }
+                            }
+                        }, _package));
 
                 _package.ShowToolWindow();
 

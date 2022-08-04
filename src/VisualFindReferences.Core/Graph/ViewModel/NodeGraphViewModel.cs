@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 using VisualFindReferences.Core.Graph.Helper;
 using VisualFindReferences.Core.Graph.Model;
 using VisualFindReferences.Core.Graph.View;
@@ -45,6 +47,68 @@ namespace VisualFindReferences.Core.Graph.ViewModel
                     {
                         Model.Connectors.Remove(connector);
                     }
+                }
+            }
+        }
+
+        public void RunAction<T>(Func<Action<string>, NodeGraphViewModel, Task<T>> task, Action<T> continuation)
+        {
+            IsBusy = true;
+            BusyText = "Loading...";
+
+            Task.Factory.StartNew(async () =>
+            {
+                try
+                {
+                    var result = await task(SetBusyText, this);
+                    View?.Dispatcher.Invoke(new Action(() =>
+                    {
+                        IsBusy = false;
+                        continuation(result);
+                    }));
+                }
+                catch (Exception e)
+                {
+                    View?.Dispatcher.Invoke(new Action(() =>
+                    {
+                        IsBusy = false;
+                        MessageBox.Show("Error occurred while getting information: " + e.Message, "Error occurred", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }));
+                }
+            });
+        }
+
+        private void SetBusyText(string text)
+        {
+            View?.Dispatcher.Invoke(new Action(() => BusyText = text));
+        }
+
+        private bool _isBusy;
+
+        public bool IsBusy
+        {
+            get { return _isBusy; }
+            set
+            {
+                if (value != _isBusy)
+                {
+                    _isBusy = value;
+                    RaisePropertyChanged(nameof(IsBusy));
+                }
+            }
+        }
+
+        private string _busyText = string.Empty;
+
+        public string BusyText
+        {
+            get { return _busyText; }
+            set
+            {
+                if (value != _busyText)
+                {
+                    _busyText = value;
+                    RaisePropertyChanged(nameof(BusyText));
                 }
             }
         }

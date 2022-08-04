@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using VisualFindReferences.Core.Graph.Layout;
@@ -39,30 +40,40 @@ namespace VisualFindReferences.TestHarness
         {
             if (e.Key == System.Windows.Input.Key.P)
             {
-                var existing = NodeGraphViewModel.NodeViewModels.FirstOrDefault(x => x.IsSelected)?.Model;
-                if (existing == null)
+                NodeGraphViewModel.RunAction<Node>(async (setBusyText, viewModel) =>
                 {
-                    existing = NodeGraphViewModel.NodeViewModels[r.Next(NodeGraphViewModel.NodeViewModels.Count)].Model;
-                }
-                var nodeGraph = NodeGraphViewModel.Model;
+                    await Task.Delay(1500);
+                    setBusyText("Still going...");
+                    await Task.Delay(500);
+                    var existing = viewModel.NodeViewModels.FirstOrDefault(x => x.IsSelected)?.Model;
+                    if (existing == null)
+                    {
+                        existing = viewModel.NodeViewModels[r.Next(viewModel.NodeViewModels.Count)].Model;
+                    }
+                    return existing;
+                },
+                node =>
+                {
+                    var nodeGraph = NodeGraphViewModel.Model;
 
-                var n1 = CreateNode(nodeGraph, existing.X, existing.Y);
-                var n2 = CreateNode(nodeGraph, existing.X, existing.Y);
+                    var n1 = CreateNode(nodeGraph, node.X, node.Y);
+                    var n2 = CreateNode(nodeGraph, node.X, node.Y);
 
-                nodeGraph.Nodes.Add(n1);
-                nodeGraph.Nodes.Add(n2);
+                    nodeGraph.Nodes.Add(n1);
+                    nodeGraph.Nodes.Add(n2);
 
-                var c1 = new Connector(nodeGraph, existing, n1);
-                var c2 = new Connector(nodeGraph, existing, n2);
+                    var c1 = new Connector(nodeGraph, node, n1);
+                    var c2 = new Connector(nodeGraph, node, n2);
 
-                nodeGraph.Connectors.Add(c1);
-                nodeGraph.Connectors.Add(c2);
+                    nodeGraph.Connectors.Add(c1);
+                    nodeGraph.Connectors.Add(c2);
 
-                var view = NodeGraphViewModel.View;
-                var nodes = new List<Tuple<Node, double, double>>();
-                nodes.Add(Tuple.Create(n1, n1.X + 200, n1.Y - 50));
-                nodes.Add(Tuple.Create(n2, n2.X + 200, n2.Y + 50));
-                NodeGraphViewModel.View.StartAnimation(nodes, view.ZoomAndPan.Scale + (r.NextDouble() - 0.5), view.ZoomAndPan.StartX + ((r.NextDouble() - 0.5) * 20), view.ZoomAndPan.StartY + ((r.NextDouble() - 0.5) * 20));
+                    var view = NodeGraphViewModel.View;
+                    var nodes = new List<Tuple<Node, double, double>>();
+                    nodes.Add(Tuple.Create(n1, n1.X + 200, n1.Y - 50));
+                    nodes.Add(Tuple.Create(n2, n2.X + 200, n2.Y + 50));
+                    NodeGraphViewModel.View.StartAnimation(nodes, view.ZoomAndPan.Scale + (r.NextDouble() - 0.5), view.ZoomAndPan.StartX + ((r.NextDouble() - 0.5) * 20), view.ZoomAndPan.StartY + ((r.NextDouble() - 0.5) * 20));
+                });
             }
 
             if (e.Key == System.Windows.Input.Key.L)

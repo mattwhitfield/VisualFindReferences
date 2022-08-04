@@ -28,7 +28,7 @@ namespace VisualFindReferences.Helper
             return null;
         }
 
-        internal static async Task<Tuple<SyntaxNode, ISymbol, TypeInfo>> GetTargetSymbolAsync(ITextView textView)
+        internal static async Task<(SyntaxNode, SemanticModel)> GetTargetSymbolAsync(ITextView textView)
         {
             var caretPosition = textView.Caret.Position.BufferPosition;
 
@@ -38,33 +38,10 @@ namespace VisualFindReferences.Helper
                 var syntaxNode = await document.GetSyntaxRootAsync().ConfigureAwait(true);
                 var semanticModel = await document.GetSemanticModelAsync().ConfigureAwait(true);
 
-                var syntaxToken = syntaxNode.FindToken(caretPosition).Parent;
-
-                if (syntaxToken != null)
-                {
-                    var declaration =
-                        syntaxToken.AncestorsAndSelf().OfType<MethodDeclarationSyntax>().FirstOrDefault() ??
-                        syntaxToken.AncestorsAndSelf().OfType<PropertyDeclarationSyntax>().FirstOrDefault() ??
-                        syntaxToken.AncestorsAndSelf().OfType<ConstructorDeclarationSyntax>().FirstOrDefault() ??
-                        syntaxToken.AncestorsAndSelf().OfType<IndexerDeclarationSyntax>().FirstOrDefault() ??
-                        syntaxToken as RecordDeclarationSyntax ??
-                        syntaxToken as StructDeclarationSyntax ??
-                        syntaxToken as ClassDeclarationSyntax as SyntaxNode;
-
-                    if (declaration != null)
-                    {
-                        return Tuple.Create(declaration, semanticModel.GetDeclaredSymbol(declaration), default(TypeInfo));
-                    }
-
-                    if (syntaxToken.Parent is BaseTypeSyntax)
-                    {
-                        var symbol = semanticModel.GetTypeInfo(syntaxToken);
-                        return Tuple.Create(syntaxToken, default(ISymbol), symbol);
-                    }
-                }
+                return (syntaxNode.FindToken(caretPosition).Parent, semanticModel);
             }
 
-            return null;
+            return (null, null);
         }
     }
 }

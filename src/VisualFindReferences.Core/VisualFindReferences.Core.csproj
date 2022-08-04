@@ -11,10 +11,14 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<None Remove="Graph\View\LoadingSpinner.xaml" />
 		<None Remove="Themes\Generic.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<Page Include="Graph\View\LoadingSpinner.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Include="Themes\Generic.xaml">
 			<Generator>MSBuild:Compile</Generator>
 			<SubType>Designer</SubType>

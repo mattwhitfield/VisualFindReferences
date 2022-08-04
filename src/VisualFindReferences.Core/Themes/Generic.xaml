@@ -5,6 +5,7 @@
 
     <!--  Background Colors  -->
     <SolidColorBrush x:Key="ViewBackGroundColor" Color="#1E1E1E" />
+    <SolidColorBrush x:Key="ViewTextColor" Color="White" />
     <SolidColorBrush x:Key="NodeBackGroundColor" Color="#121212" />
     <SolidColorBrush x:Key="NodeBorderColor" Color="#7160E8" />
 
@@ -16,7 +17,7 @@
                     <Path
                         x:Name="ConnectorPath"
                         Data="{Binding Path=CurveData, RelativeSource={RelativeSource AncestorType={x:Type v:ConnectorView}}}"
-                        Stroke="White"
+                        Stroke="{StaticResource ViewTextColor}"
                         StrokeThickness="2" />
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
@@ -38,7 +39,7 @@
     <!--  DefaultNodeView Style  -->
     <Style x:Key="DefaultNodeViewStyle" TargetType="{x:Type v:NodeView}">
         <Setter Property="Background" Value="{StaticResource NodeBackGroundColor}" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Foreground" Value="{StaticResource ViewTextColor}" />
         <Setter Property="BorderBrush" Value="{StaticResource NodeBorderColor}" />
         <Setter Property="Canvas.Left" Value="{Binding Model.X}" />
         <Setter Property="Canvas.Top" Value="{Binding Model.Y}" />
@@ -156,61 +157,104 @@
     <!--  NodeGraphView style  -->
     <Style TargetType="{x:Type v:NodeGraphView}">
         <Setter Property="Background" Value="{StaticResource ViewBackGroundColor}" />
+        <Setter Property="Foreground" Value="{StaticResource ViewTextColor}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type v:NodeGraphView}">
-                    <Border
-                        x:Name="PART_Background"
-                        Margin="{TemplateBinding Margin}"
-                        Padding="0"
-                        Background="{TemplateBinding Background}"
-                        BorderThickness="0">
-                        <Grid x:Name="PART_ParentGrid" ClipToBounds="True">
-                            <!--  Connections  -->
-                            <v:ConnectorViewsContainer x:Name="PART_ConnectorViewsContainer" ItemsSource="{Binding ConnectorViewModels}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <Canvas IsHitTestVisible="True" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                            </v:ConnectorViewsContainer>
-                            <!--  Nodes  -->
-                            <v:NodeViewsContainer
-                                x:Name="PART_NodeViewsContainer"
-                                IsHitTestVisible="True"
-                                ItemsSource="{Binding NodeViewModels}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <Canvas />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                            </v:NodeViewsContainer>
-                            <!--  Drag & Selection  -->
-                            <Canvas
-                                Name="PART_DragAndSelectionCanvas"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Top"
-                                IsHitTestVisible="False"
-                                Visibility="{Binding SelectionVisibility, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}">
-                                <Border
-                                    Canvas.Left="{Binding SelectionStartX, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
-                                    Canvas.Top="{Binding SelectionStartY, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
-                                    Width="{Binding SelectionWidth, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
-                                    Height="{Binding SelectionHeight, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
-                                    BorderBrush="LightBlue"
-                                    BorderThickness="2"
-                                    Canvas.ZIndex="1" />
-                                <Border
-                                    Canvas.Left="{Binding SelectionStartX, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
-                                    Canvas.Top="{Binding SelectionStartY, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
-                                    Width="{Binding SelectionWidth, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
-                                    Height="{Binding SelectionHeight, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
-                                    Background="LightBlue"
-                                    Canvas.ZIndex="0"
-                                    Opacity="0.4" />
-                            </Canvas>
-                        </Grid>
-                    </Border>
+                    <ControlTemplate.Resources>
+                        <ResourceDictionary>
+                            <ControlTemplate x:Key="LoadingContainerVisualSource" TargetType="v:LoadingContainer">
+                                <Grid>
+                                    <Grid x:Name="PART_Content">
+                                        <ContentPresenter />
+                                    </Grid>
+
+                                    <Border
+                                        x:Name="PART_Border"
+                                        Background="{StaticResource ViewBackGroundColor}"
+                                        IsHitTestVisible="True"
+                                        Opacity="0.5"
+                                        Visibility="Collapsed" />
+
+                                    <Grid VerticalAlignment="Center">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <v:LoadingSpinner
+                                            x:Name="PART_Spinner"
+                                            Width="96"
+                                            Height="96"
+                                            HorizontalAlignment="Center"
+                                            Visibility="Collapsed" />
+                                        <TextBlock
+                                            x:Name="PART_Label"
+                                            Grid.Row="1"
+                                            HorizontalAlignment="Center"
+                                            Foreground="{StaticResource ViewTextColor}"
+                                            Visibility="Collapsed" />
+                                    </Grid>
+                                </Grid>
+                            </ControlTemplate>
+                        </ResourceDictionary>
+                    </ControlTemplate.Resources>
+                    <v:LoadingContainer
+                        IsBusy="{Binding IsBusy}"
+                        Template="{StaticResource LoadingContainerVisualSource}"
+                        Text="{Binding BusyText}">
+                        <Border
+                            x:Name="PART_Background"
+                            Margin="{TemplateBinding Margin}"
+                            Padding="0"
+                            Background="{TemplateBinding Background}"
+                            BorderThickness="0">
+                            <Grid x:Name="PART_ParentGrid" ClipToBounds="True">
+                                <!--  Connections  -->
+                                <v:ConnectorViewsContainer x:Name="PART_ConnectorViewsContainer" ItemsSource="{Binding ConnectorViewModels}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <Canvas IsHitTestVisible="True" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </v:ConnectorViewsContainer>
+                                <!--  Nodes  -->
+                                <v:NodeViewsContainer
+                                    x:Name="PART_NodeViewsContainer"
+                                    IsHitTestVisible="True"
+                                    ItemsSource="{Binding NodeViewModels}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <Canvas />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </v:NodeViewsContainer>
+                                <!--  Drag & Selection  -->
+                                <Canvas
+                                    Name="PART_DragAndSelectionCanvas"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    IsHitTestVisible="False"
+                                    Visibility="{Binding SelectionVisibility, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}">
+                                    <Border
+                                        Canvas.Left="{Binding SelectionStartX, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                        Canvas.Top="{Binding SelectionStartY, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                        Width="{Binding SelectionWidth, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                        Height="{Binding SelectionHeight, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                        BorderBrush="LightBlue"
+                                        BorderThickness="2"
+                                        Canvas.ZIndex="1" />
+                                    <Border
+                                        Canvas.Left="{Binding SelectionStartX, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                        Canvas.Top="{Binding SelectionStartY, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                        Width="{Binding SelectionWidth, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                        Height="{Binding SelectionHeight, RelativeSource={RelativeSource AncestorType={x:Type v:NodeGraphView}}}"
+                                        Background="LightBlue"
+                                        Canvas.ZIndex="0"
+                                        Opacity="0.4" />
+                                </Canvas>
+                            </Grid>
+                        </Border>
+                    </v:LoadingContainer>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
