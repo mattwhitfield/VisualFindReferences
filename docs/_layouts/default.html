@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: "en-US" }}">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
+	<title>Visual Find References | {{ page.title | default: site.title }}</title>
+	<link rel="shortcut icon" type="image/x-icon" href="{{ "/favicon.ico" | relative_url }}">
+    {% include head-custom.html %}
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1><a href="{{ "/" | absolute_url }}"><img src="{{ "/assets/full_logo.png" | relative_url }}" alt="Logo" /></a></h1>
+
+        <p>{{ site.description | default: site.github.project_tagline }}</p>
+
+		<div class="thinNav">
+        <a href="{{ "/index.html" | relative_url }}">Home</a> | <a href="{{ "/gettingstarted.html" | relative_url }}">Getting started</a> | <a href="{{ "/configuration.html" | relative_url }}">Configuration</a> | 
+		<a href="{{ "/features.html" | relative_url }}">Features</a> | <a href="{{ "/contributing.html" | relative_url }}">Contributing</a>
+		</div>
+
+		<div class="extra">
+
+        <p class="view">
+		<ul>
+		<li><a href="{{ "/index.html" | relative_url }}">Home</a></li>
+		<li><a href="{{ "/gettingstarted.html" | relative_url }}">Getting started</a></li>
+        <li><a href="{{ "/configuration.html" | relative_url }}">Configuration</a></li>
+        <li><a href="{{ "/features.html" | relative_url }}">Features</a></li>
+        <li><a href="{{ "/contributing.html" | relative_url }}">Contributing</a></li>
+		</ul>
+		</p>
+
+        <p class="view">
+		Get the extension from the Visual Studio Marketplace:
+		<ul>
+		<li><a href="https://marketplace.visualstudio.com/items?itemName=MattWhitfield.VisualFindReferences">For Visual Studio 2019</a></li>
+		<li><a href="https://marketplace.visualstudio.com/items?itemName=MattWhitfield.VisualFindReferencesVS2022">For Visual Studio 2022</a></li>
+		</ul>
+		</p>
+
+        <p class="view">
+		Alternatively see the releases on GitHub:
+		<ul>
+		<li><a href="https://github.com/mattwhitfield/VisualFindReferences/releases">GitHub Releases</a></li>
+		</ul>
+		</p>
+
+        </div>
+
+      </header>
+      <section>
+
+      {{ content }}
+
+      </section>
+      <footer>
+        {% if site.github.is_project_page %}
+        <p class="view"><a href="{{ site.github.repository_url }}">View the Project on GitHub <small>{{ site.github.repository_nwo }}</small></a></p>
+        {% endif %}
+
+        {% if site.github.is_project_page %}
+        <p>Visual Find References is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
+        {% endif %}
+      </footer>
+    </div>
+    <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
+  </body>
+</html>
