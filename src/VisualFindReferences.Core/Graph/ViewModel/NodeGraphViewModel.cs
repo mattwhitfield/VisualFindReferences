@@ -115,24 +115,7 @@ namespace VisualFindReferences.Core.Graph.ViewModel
 
         private ISet<TModel> HandleCollectionChanged<TModel, TViewModel>(NotifyCollectionChangedEventArgs e, ObservableCollection<TViewModel> targetCollection, Func<TModel, TViewModel> selector)
         {
-            var oldItems = new HashSet<TModel>(e.OldItems?.OfType<TModel>() ?? Enumerable.Empty<TModel>());
-            var newItems = e.NewItems?.OfType<TModel>() ?? Enumerable.Empty<TModel>();
-
-            foreach (var item in newItems)
-            {
-                if (oldItems.Remove(item))
-                {
-                    // was in old items - so is just a change, ignore
-                }
-                else
-                {
-                    targetCollection.Add(selector(item));
-                }
-            }
-
-            // items left in old items are ones that are not in new items
-            oldItems.Each(x => targetCollection.Remove(selector(x)));
-            return oldItems;
+            return CollectionChangedHandler.HandleCollectionChanged<TModel>(e, item => targetCollection.Add(selector(item)), item => targetCollection.Remove(selector(item)));
         }
     }
 }

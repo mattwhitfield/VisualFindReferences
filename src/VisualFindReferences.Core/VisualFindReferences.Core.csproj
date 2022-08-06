@@ -8,8 +8,27 @@
 	  <DelaySign>false</DelaySign>
 	  <LangVersion>8.0</LangVersion>
 	  <Nullable>enable</Nullable>
+      <VsTargetVersion Condition="'$(VsTargetVersion)' == '' and '$(VisualStudioVersion)' == '17.0' ">VS2022</VsTargetVersion>
+      <VsTargetVersion Condition="'$(VsTargetVersion)' == '' and '$(VisualStudioVersion)' == '16.0' ">VS2019</VsTargetVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(VsTargetVersion)' == 'VS2022'">
+    <DefineConstants>$(DefineConstants);VS2022</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(VsTargetVersion)' == 'VS2019'">
+    <DefineConstants>$(DefineConstants);VS2019</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(VsTargetVersion)' == 'VS2022'">
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(VsTargetVersion)' == 'VS2019'">
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.11.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.11.0" />
+  </ItemGroup>
+  
 	<ItemGroup>
 		<None Remove="Graph\View\LoadingSpinner.xaml" />
 		<None Remove="Themes\Generic.xaml" />

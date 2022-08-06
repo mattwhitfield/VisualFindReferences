@@ -27,7 +27,7 @@ namespace VisualFindReferences.Core.Graph.Model
                 if (value != _x)
                 {
                     _x = value;
-                    RaisePropertyChanged("X");
+                    RaisePropertyChanged(nameof(X));
                 }
             }
         }
@@ -42,7 +42,7 @@ namespace VisualFindReferences.Core.Graph.Model
                 if (value != _y)
                 {
                     _y = value;
-                    RaisePropertyChanged("Y");
+                    RaisePropertyChanged(nameof(Y));
                 }
             }
         }

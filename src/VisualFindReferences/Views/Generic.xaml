@@ -1,15 +1,14 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:v="clr-namespace:VisualFindReferences.Core.Graph.View">
+    xmlns:platformUI="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+    xmlns:v="clr-namespace:VisualFindReferences.Core.Graph.View;assembly=VisualFindReferences.Core">
 
-    <!--  Background Colors  -->
-    <SolidColorBrush x:Key="ViewBackGroundColor" Color="#1E1E1E" />
-    <SolidColorBrush x:Key="ViewTextColor" Color="White" />
-    <SolidColorBrush x:Key="NodeBackGroundColor" Color="#121212" />
-    <SolidColorBrush x:Key="NodeBorderColor" Color="#7160E8" />
+    <SolidColorBrush x:Key="ViewBackGroundColor" Color="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowBackgroundColorKey}}" />
+    <SolidColorBrush x:Key="ViewTextColor" Color="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextColorKey}}" />
+    <SolidColorBrush x:Key="NodeBackGroundColor" Color="{DynamicResource {x:Static platformUI:CommonControlsColors.ComboBoxBackgroundColorKey}}" />
+    <SolidColorBrush x:Key="NodeBorderColor" Color="{DynamicResource {x:Static platformUI:CommonDocumentColors.InnerTabActiveIndicatorColorKey}}" />
 
-    <!--  ConnectorView Style  -->
     <Style x:Key="DefaultConnectorViewStyle" TargetType="{x:Type v:ConnectorView}">
         <Setter Property="Template">
             <Setter.Value>
@@ -21,7 +20,7 @@
                         StrokeThickness="2" />
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="ConnectorPath" Property="Stroke" Value="Green" />
+                            <Setter TargetName="ConnectorPath" Property="Stroke" Value="{DynamicResource {x:Static platformUI:CommonDocumentColors.StatusBannerSuccessBorderTextBrushKey}}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -36,7 +35,6 @@
         </StackPanel>
     </DataTemplate>
 
-    <!--  DefaultNodeView Style  -->
     <Style x:Key="DefaultNodeViewStyle" TargetType="{x:Type v:NodeView}">
         <Setter Property="Background" Value="{StaticResource NodeBackGroundColor}" />
         <Setter Property="Foreground" Value="{StaticResource ViewTextColor}" />
@@ -90,13 +88,11 @@
                                 <BlurEffect KernelType="Box" Radius="8.0" />
                             </Border.Effect>
                         </Border>
-                        <!--  Background  -->
                         <Border
                             Margin="{TemplateBinding Margin}"
                             Padding="{TemplateBinding Padding}"
                             Background="{TemplateBinding Background}"
                             CornerRadius="4" />
-                        <!--  Selection  -->
                         <Border
                             x:Name="BorderSelection"
                             Margin="{TemplateBinding Margin}"
@@ -104,7 +100,6 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="2"
                             CornerRadius="4">
-                            <!--  Content  -->
                             <Grid Margin="2">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -139,12 +134,11 @@
                         </Border>
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <!--  Node Selection Trigger  -->
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="BorderSelection" Property="BorderBrush" Value="Orange" />
+                            <Setter TargetName="BorderSelection" Property="BorderBrush" Value="{DynamicResource {x:Static platformUI:CommonControlsColors.ComboBoxSelectionBrushKey}}" />
                         </Trigger>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="BorderSelection" Property="BorderBrush" Value="Green" />
+                            <Setter TargetName="BorderSelection" Property="BorderBrush" Value="{DynamicResource {x:Static platformUI:CommonDocumentColors.StatusBannerSuccessBorderTextBrushKey}}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="BlurEffect" Property="Visibility" Value="Visible" />
@@ -155,7 +149,6 @@
         </Setter>
     </Style>
 
-    <!--  NodeGraphView style  -->
     <Style x:Key="DefaultNodeGraphViewStyle" TargetType="{x:Type v:NodeGraphView}">
         <Setter Property="Background" Value="{StaticResource ViewBackGroundColor}" />
         <Setter Property="Foreground" Value="{StaticResource ViewTextColor}" />
@@ -210,7 +203,6 @@
                             Background="{TemplateBinding Background}"
                             BorderThickness="0">
                             <Grid x:Name="PART_ParentGrid" ClipToBounds="True">
-                                <!--  Connections  -->
                                 <v:ConnectorViewsContainer x:Name="PART_ConnectorViewsContainer" ItemsSource="{Binding ConnectorViewModels}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -218,7 +210,6 @@
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                 </v:ConnectorViewsContainer>
-                                <!--  Nodes  -->
                                 <v:NodeViewsContainer
                                     x:Name="PART_NodeViewsContainer"
                                     IsHitTestVisible="True"
@@ -229,7 +220,6 @@
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                 </v:NodeViewsContainer>
-                                <!--  Drag & Selection  -->
                                 <Canvas
                                     Name="PART_DragAndSelectionCanvas"
                                     HorizontalAlignment="Left"

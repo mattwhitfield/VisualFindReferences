@@ -1,7 +1,10 @@
-﻿namespace VisualFindReferences.Views
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.VisualStudio.Text.Editor;
+
+namespace VisualFindReferences.Views
 {
     public interface IVisualFindReferencesToolWindow
     {
-        void FindReferences();
+        void FindReferences(IWpfTextView textView, IVisualFindReferencesPackage package);
     }
 }

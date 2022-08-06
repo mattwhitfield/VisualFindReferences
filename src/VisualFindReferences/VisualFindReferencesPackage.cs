@@ -9,6 +9,7 @@
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
     using VisualFindReferences.Commands;
+    using VisualFindReferences.Core.Graph.View;
     using VisualFindReferences.Views;
     using Task = System.Threading.Tasks.Task;
 
@@ -25,6 +26,12 @@
         public IVisualFindReferencesToolWindow ShowToolWindow()
         {
             ThreadHelper.ThrowIfNotOnUIThread();
+#if VS2022
+            StyleFinder.ResourceUri = "pack://application:,,,/VisualFindReferencesVS2022;component/views/generic.xaml";
+#else
+            StyleFinder.ResourceUri = "pack://application:,,,/VisualFindReferencesVS2019;component/views/generic.xaml";
+
+#endif
             var window = FindToolWindow(typeof(VisualFindReferencesToolWindow), 0, true);
             if (window?.Frame == null)
             {

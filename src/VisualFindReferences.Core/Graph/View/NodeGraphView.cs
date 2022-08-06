@@ -50,11 +50,6 @@ namespace VisualFindReferences.Core.Graph.View
 
         private IList<Node>? _originalSelections;
 
-        static NodeGraphView()
-        {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(NodeGraphView), new FrameworkPropertyMetadata(typeof(NodeGraphView)));
-        }
-
         public NodeGraphView()
         {
             Focusable = true;
@@ -68,6 +63,8 @@ namespace VisualFindReferences.Core.Graph.View
             _animationTimer.Tick += _animationTimer_Tick; ;
 
             ZoomAndPan.UpdateTransform += _ZoomAndPan_UpdateTransform;
+
+            StyleFinder.Apply(this, "DefaultNodeGraphViewStyle");
         }
 
         public event EventHandler<ContextMenuEventArgs>? NodeContextMenuRequested;
@@ -381,11 +378,16 @@ namespace VisualFindReferences.Core.Graph.View
         private void NodeGraphViewDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             ViewModel = DataContext as NodeGraphViewModel;
-            if (null == ViewModel)
+            if (ViewModel == null)
+            {
                 return;
+            }
 
             ViewModel.View = this;
+        }
 
+        private void _ZoomAndPan_UpdateTransform()
+        {
             if (_connectorCanvas == null)
             {
                 _connectorCanvas = ViewUtil.FindChild<Canvas>(_partConnectorViewsContainer);
@@ -395,10 +397,7 @@ namespace VisualFindReferences.Core.Graph.View
             {
                 _nodeCanvas = ViewUtil.FindChild<Canvas>(_partNodeViewsContainer);
             }
-        }
 
-        private void _ZoomAndPan_UpdateTransform()
-        {
             if (_nodeCanvas != null && _connectorCanvas != null)
             {
                 _nodeCanvas.RenderTransform = new MatrixTransform(ZoomAndPan.Matrix);
@@ -675,7 +674,7 @@ namespace VisualFindReferences.Core.Graph.View
             {
                 return;
             }
-            
+
             const int ConstraintBorder = 20;
 
             double newScale = ZoomAndPan.Scale;

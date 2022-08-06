@@ -118,13 +118,17 @@ namespace VisualFindReferences.TestHarness
         {
             Node GetNode()
             {
-                switch (r.Next(6))
+                switch (r.Next(10))
                 {
                     case 0: return new MethodNode(nodeGraph, text + "Method", "MyProgram.Stuff.MethodType", x, y);
                     case 1: return new LocalMethodNode(nodeGraph, text + "LocalMethod", "MyProgram.Stuff.LocalMethodType", x, y);
                     case 2: return new PropertyNode(nodeGraph, text + "Property", "MyProgram.Stuff.PropertyType", x, y);
                     case 3: return new LambdaNode(nodeGraph, text + "Lambda", "MyProgram.Stuff.LambdaNode", x, y);
                     case 4: return new OperatorNode(nodeGraph, text + "Operator", "MyProgram.Stuff.OperatorType", x, y);
+                    case 5: return new EventNode(nodeGraph, text + "Event", "MyProgram.Stuff.EventType", x, y);
+                    case 6: return new IndexerNode(nodeGraph, text + "Indexer", "MyProgram.Stuff.IndexerType", x, y);
+                    case 7: return new ConstructorNode(nodeGraph, text + "Constructor", "MyProgram.Stuff.ConstructorType", x, y);
+                    case 8: return new DestructorNode(nodeGraph, text + "Destructor", "MyProgram.Stuff.DestructorType", x, y);
                     default: return new FieldInitializerNode(nodeGraph, text + "FieldInitializer", "MyProgram.Stuff.FieldInitializerType", x, y);
                 }
             }

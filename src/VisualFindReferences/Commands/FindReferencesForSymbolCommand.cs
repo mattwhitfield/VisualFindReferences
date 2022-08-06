@@ -76,8 +76,7 @@
         /// <param name="e">Event args.</param>
         private void Execute(object sender, EventArgs e)
         {
-            Attempt.Action(
-                () =>
+            Attempt.Action(() =>
             {
                 ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -87,36 +86,7 @@
                     throw new InvalidOperationException("Could not find the text view");
                 }
 
-                var caretPosition = textView.Caret.Position.BufferPosition;
-                var document = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
-
-                var item = VsProjectHelper.GetProjectItem(document.FilePath);
-
-                var methodTask = _package.JoinableTaskFactory.RunAsync(async () => await TextViewHelper.GetTargetSymbolAsync(textView).ConfigureAwait(true));
-                var tuple = methodTask.Join();
-
-                _ = _package.JoinableTaskFactory.RunAsync(
-                    () => Attempt.ActionAsync(
-                        async () =>
-                        {
-                            var (syntaxNode, semanticModel) = await TextViewHelper.GetTargetSymbolAsync(textView).ConfigureAwait(true);
-
-                            if (syntaxNode != null)
-                            {
-                                var declaredSymbol = semanticModel.GetDeclaredSymbol(syntaxNode);
-                                if (declaredSymbol != null)
-                                {
-                                    var list = await SymbolFinder.FindReferencesAsync(declaredSymbol, document.Project.Solution).ConfigureAwait(true);
-                                    MethodDeclarationSyntax s;
-                                    BlockSyntax b;
-
-                                }
-                            }
-                        }, _package));
-
-                _package.ShowToolWindow();
-
-                VsMessageBox.Show("here", false, _package);
+                _package.ShowToolWindow().FindReferences(textView, _package);
             }, _package);
         }
     }
