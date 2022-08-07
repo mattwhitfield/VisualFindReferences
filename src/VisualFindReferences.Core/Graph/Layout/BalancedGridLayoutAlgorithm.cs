@@ -8,7 +8,7 @@ namespace VisualFindReferences.Core.Graph.Layout
 {
     public abstract class BalancedGridLayoutAlgorithm : LayoutAlgorithm
     {
-        public BalancedGridLayoutAlgorithm(NodeGraph visitedGraph, IDictionary<Node, Point> verticesPositions) : base(visitedGraph, verticesPositions)
+        public BalancedGridLayoutAlgorithm(NodeGraph visitedGraph, IDictionary<Node, GraphPoint> verticesPositions) : base(visitedGraph, verticesPositions)
         {
         }
 
@@ -18,6 +18,8 @@ namespace VisualFindReferences.Core.Graph.Layout
         private Dictionary<Node, int> _passesByNode = new Dictionary<Node, int>();
         private Dictionary<int, List<Node>> _nodeGroups = new Dictionary<int, List<Node>>();
         private Dictionary<int, List<Node>> _outputGroups = new Dictionary<int, List<Node>>();
+
+        protected override bool AlgorithmReqiuresOverlapRemoval => false;
 
         protected override void Initialize()
         {
@@ -34,14 +36,16 @@ namespace VisualFindReferences.Core.Graph.Layout
                     {
                         if (!laidOutNodes.Contains(connector.EndNode))
                         {
-                            rightNodes.Add(connector.EndNode);
+                            leftNodes.Add(connector.EndNode);
+                            //rightNodes.Add(connector.EndNode);
                         }
                     }
                     if (connector.EndNode == currentNode)
                     {
                         if (!laidOutNodes.Contains(connector.StartNode))
                         {
-                            leftNodes.Add(connector.StartNode);
+                            rightNodes.Add(connector.StartNode);
+                            //leftNodes.Add(connector.StartNode);
                         }
                     }
                 }

@@ -5,9 +5,17 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="clr-namespace:VisualFindReferences.Core.Graph.View;assembly=VisualFindReferences.Core"
+    xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <StaticResource ResourceKey="{x:Static vsfx:VsResourceKeys.ThemedDialogDefaultStylesKey}" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <v:NodeGraphView x:Name="GraphView" NodeContextMenuRequested="NodeGraphViewNodeContextMenuRequested" />
     </Grid>

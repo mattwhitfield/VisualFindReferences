@@ -13,11 +13,13 @@ namespace VisualFindReferences.Core.Graph.Layout
 
         private FRLayoutParameters _parameters = new FRLayoutParameters();
 
-        public FRLayoutAlgorithm(NodeGraph visitedGraph, IDictionary<Node, Point> verticesPositions) : base(visitedGraph, verticesPositions)
+        public FRLayoutAlgorithm(NodeGraph visitedGraph, IDictionary<Node, GraphPoint> verticesPositions) : base(visitedGraph, verticesPositions)
         { }
 
         private double _constantOfRepulsion;
         private double _constantOfAttraction;
+
+        protected override bool AlgorithmReqiuresOverlapRemoval => true;
 
         protected override void Initialize()
         {
@@ -29,7 +31,7 @@ namespace VisualFindReferences.Core.Graph.Layout
                 {
                     VerticesPositions.Add(
                         vertex,
-                        new Point(
+                        new GraphPoint(
                             Math.Max(double.Epsilon, Random.NextDouble() * 10),
                             Math.Max(double.Epsilon, Random.NextDouble() * 10)));
                 }
@@ -57,13 +59,13 @@ namespace VisualFindReferences.Core.Graph.Layout
         private void IterateOne()
         {
             // Create the forces (zero forces)
-            var forces = new Dictionary<Node, Vector>();
+            var forces = new Dictionary<Node, GraphVector>();
 
             foreach (Node v in VisitedGraph.Nodes)
             {
-                var force = default(Vector);
+                var force = default(GraphVector);
 
-                Point posV = VerticesPositions[v];
+                GraphPoint posV = VerticesPositions[v];
                 foreach (Node u in VisitedGraph.Nodes)
                 {
                     // Doesn't repulse itself
@@ -71,7 +73,7 @@ namespace VisualFindReferences.Core.Graph.Layout
                         continue;
 
                     // Calculate repulsive force
-                    Vector delta = posV - VerticesPositions[u];
+                    GraphVector delta = posV - VerticesPositions[u];
                     double length = Math.Max(delta.Length, double.Epsilon);
                     delta = delta / length * _constantOfRepulsion / length;
 
@@ -87,7 +89,7 @@ namespace VisualFindReferences.Core.Graph.Layout
                 Node target = edge.EndNode;
 
                 // Compute attraction point between 2 vertices
-                Vector delta = VerticesPositions[source] - VerticesPositions[target];
+                GraphVector delta = VerticesPositions[source] - VerticesPositions[target];
                 double length = Math.Max(delta.Length, double.Epsilon);
                 delta = delta / length * Math.Pow(length, 2) / _constantOfAttraction;
 
@@ -97,9 +99,9 @@ namespace VisualFindReferences.Core.Graph.Layout
 
             foreach (Node vertex in VisitedGraph.Nodes)
             {
-                Point position = VerticesPositions[vertex];
+                GraphPoint position = VerticesPositions[vertex];
 
-                Vector delta = forces[vertex];
+                GraphVector delta = forces[vertex];
                 if (delta != default)
                 {
                     double length = Math.Max(delta.Length, double.Epsilon);

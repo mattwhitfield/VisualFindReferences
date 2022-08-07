@@ -1,4 +1,7 @@
-﻿using System.Windows.Media;
+﻿using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Media;
 
 namespace VisualFindReferences.Core.Graph.Model.Nodes
 {
@@ -8,5 +11,17 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
 
         public FieldInitializerNode(NodeGraph flowChart, FoundReferences foundReferences) : base(flowChart, foundReferences, DefaultIcon, Brushes.Purple)
         { }
+
+        public override string NodeSymbolType => "Field Initializer";
+
+        public override IEnumerable<SearchableSymbol> GetSearchableSymbols()
+        {
+            yield return new SearchableSymbol(NodeFoundReferences, new[] { NodeFoundReferences.Symbol }, NodeFoundReferences.Solution, "field " + ContainerName);
+
+            var type = NodeFoundReferences.Symbol.ContainingType;
+            var constructors = type.Constructors.OfType<ISymbol>().ToList();
+            yield return new SearchableSymbol(NodeFoundReferences, constructors, NodeFoundReferences.Solution, "all constructors of type " + TypeName);
+        }
+
     }
 }

@@ -11,9 +11,9 @@ namespace VisualFindReferences.Core.Graph.Layout
         {
             public TObject Id { get; }
 
-            public Rect Rectangle;
+            public GraphRect Rectangle;
 
-            public RectangleWrapper(TObject id, Rect rectangle)
+            public RectangleWrapper(TObject id, GraphRect rectangle)
             {
                 Id = id;
                 Rectangle = rectangle;
@@ -26,9 +26,9 @@ namespace VisualFindReferences.Core.Graph.Layout
 
         private List<RectangleWrapper<Node>> WrappedRectangles;
 
-        public IDictionary<Node, Rect> Rectangles { get; }
+        public IDictionary<Node, GraphRect> Rectangles { get; }
 
-        public FSAAlgorithm(IDictionary<Node, Rect> rectangles)
+        public FSAAlgorithm(IDictionary<Node, GraphRect> rectangles)
         {
             // Original rectangles
             Rectangles = rectangles ?? throw new ArgumentNullException(nameof(rectangles));
@@ -78,10 +78,10 @@ namespace VisualFindReferences.Core.Graph.Layout
             }
         }
 
-        protected Vector Force(Rect vi, Rect vj)
+        protected GraphVector Force(GraphRect vi, GraphRect vj)
         {
-            var force = new Vector(0, 0);
-            Vector distance = vj.GetCenter() - vi.GetCenter();
+            var force = new GraphVector(0, 0);
+            GraphVector distance = vj.GetCenter() - vi.GetCenter();
             double absDistanceX = Math.Abs(distance.X);
             double absDistanceY = Math.Abs(distance.Y);
             double gij = distance.Y / distance.X;
@@ -104,10 +104,10 @@ namespace VisualFindReferences.Core.Graph.Layout
             return force;
         }
 
-        protected Vector Force2(Rect vi, Rect vj)
+        protected GraphVector Force2(GraphRect vi, GraphRect vj)
         {
-            var force = new Vector(0, 0);
-            Vector distance = vj.GetCenter() - vi.GetCenter();
+            var force = new GraphVector(0, 0);
+            GraphVector distance = vj.GetCenter() - vi.GetCenter();
             double gij = distance.Y / distance.X;
             if (vi.IntersectsWith(vj))
             {
@@ -179,7 +179,7 @@ namespace VisualFindReferences.Core.Graph.Layout
                         double ggg = 0;
                         for (int j = 0; j < i; ++j)
                         {
-                            Vector force = Force(WrappedRectangles[j].Rectangle, WrappedRectangles[m].Rectangle);
+                            GraphVector force = Force(WrappedRectangles[j].Rectangle, WrappedRectangles[m].Rectangle);
                             ggg = Math.Max(force.X + gamma[j], ggg);
                         }
 
@@ -211,7 +211,7 @@ namespace VisualFindReferences.Core.Graph.Layout
                 {
                     for (int j = k + 1; j < n; ++j)
                     {
-                        Vector force = Force(WrappedRectangles[m].Rectangle, WrappedRectangles[j].Rectangle);
+                        GraphVector force = Force(WrappedRectangles[m].Rectangle, WrappedRectangles[j].Rectangle);
                         if (force.X > delta)
                         {
                             delta = force.X;
@@ -291,7 +291,7 @@ namespace VisualFindReferences.Core.Graph.Layout
                         double ggg = 0;
                         for (int j = 0; j < i; ++j)
                         {
-                            Vector f = Force2(WrappedRectangles[j].Rectangle, WrappedRectangles[m].Rectangle);
+                            GraphVector f = Force2(WrappedRectangles[j].Rectangle, WrappedRectangles[m].Rectangle);
                             ggg = Math.Max(f.Y + gamma[j], ggg);
                         }
 
@@ -320,7 +320,7 @@ namespace VisualFindReferences.Core.Graph.Layout
                 {
                     for (int j = k + 1; j < n; ++j)
                     {
-                        Vector force = Force(WrappedRectangles[m].Rectangle, WrappedRectangles[j].Rectangle);
+                        GraphVector force = Force(WrappedRectangles[m].Rectangle, WrappedRectangles[j].Rectangle);
                         if (force.Y > delta)
                         {
                             delta = force.Y;

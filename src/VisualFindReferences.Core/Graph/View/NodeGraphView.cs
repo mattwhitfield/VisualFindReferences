@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using VisualFindReferences.Core.Graph.Helper;
+using VisualFindReferences.Core.Graph.Layout;
 using VisualFindReferences.Core.Graph.Model;
 using VisualFindReferences.Core.Graph.ViewModel;
 
@@ -109,12 +110,12 @@ namespace VisualFindReferences.Core.Graph.View
 
         public static readonly DependencyProperty SelectionVisibilityProperty = DependencyProperty.Register("SelectionVisibility", typeof(Visibility), typeof(NodeGraphView), new PropertyMetadata(Visibility.Collapsed));
 
-        public void StartAnimation(IEnumerable<Tuple<Node, double, double>> nodes, double scale, double startX, double startY)
+        public void StartAnimation(IDictionary<Node, Layout.GraphPoint> nodes, double scale, double startX, double startY)
         {
             _animation = new GraphAnimation(ZoomAndPan, scale, startX, startY);
             foreach (var pair in nodes)
             {
-                _animation.NodeAnimations.Add(new NodeAnimation(pair.Item1, pair.Item2, pair.Item3));
+                _animation.NodeAnimations.Add(new NodeAnimation(pair.Key, pair.Value.X, pair.Value.Y));
             }
 
             _animationStopwatch = Stopwatch.StartNew();
@@ -182,8 +183,6 @@ namespace VisualFindReferences.Core.Graph.View
             }
         }
 
-
-
         private void AddSelection(Node node)
         {
             node.ViewModel.IsSelected = true;
@@ -205,24 +204,21 @@ namespace VisualFindReferences.Core.Graph.View
         }
 
 
-        public Node? FindNodeUnderMouse(Point mousePos, out Point viewSpacePos, out Point modelSpacePos)
+        public Node? FindNodeUnderMouse(Point mousePos, out Point modelSpacePos)
         {
-            viewSpacePos = mousePos;
-            modelSpacePos = ZoomAndPan.MatrixInv.Transform(mousePos);
+            var modelPos = modelSpacePos = ZoomAndPan.MatrixInv.Transform(mousePos);
 
-            HitTestResult hitResult = VisualTreeHelper.HitTest(this, mousePos);
-            if (hitResult != null && hitResult.VisualHit != null)
+            return ViewModel?.Model.Nodes.FirstOrDefault(x => ContainsPoint(x, modelPos));
+        }
+
+        private bool ContainsPoint(Node node, Point mousePos)
+        {
+            var view = node.ViewModel.View;
+            if (view == null)
             {
-                DependencyObject hit = hitResult.VisualHit;
-
-                NodeView? nodeView = ViewUtil.FindFirstParent<NodeView>(hit);
-                if (nodeView != null)
-                {
-                    return nodeView.ViewModel?.Model;
-                }
+                return false;
             }
-
-            return null;
+            return mousePos.X >= node.X && mousePos.Y >= node.Y && mousePos.X <= node.X + view.ActualWidth && mousePos.Y <= node.Y + view.ActualHeight;
         }
 
         private IEnumerable<Node> SelectedNodes => ViewModel?.NodeViewModels.Where(x => x.IsSelected).Select(x => x.Model) ?? Enumerable.Empty<Node>();
@@ -512,11 +508,11 @@ namespace VisualFindReferences.Core.Graph.View
 
             if (!wasDraggingCanvas)
             {
-                var node = FindNodeUnderMouse(mousePos, out var viewSpacePos, out var modelSpacePos);
+                var node = FindNodeUnderMouse(mousePos, out var modelSpacePos);
 
                 if (node != null)
                 {
-                    ContextMenuEventArgs args = new ContextMenuEventArgs(node, viewSpacePos, modelSpacePos);
+                    ContextMenuEventArgs args = new ContextMenuEventArgs(node, mousePos, modelSpacePos);
 
                     NodeContextMenuRequested?.Invoke(this, args);
 
@@ -697,7 +693,7 @@ namespace VisualFindReferences.Core.Graph.View
             Point vsZoomCenter = e.GetPosition(this);
             Point zoomCenter = ZoomAndPan.MatrixInv.Transform(vsZoomCenter);
 
-            ZoomAndPan.Scale = ConstrainScale(newScale);
+            ZoomAndPan.Scale = ZoomAndPan.ConstrainScale(newScale);
 
             Point vsNextZoomCenter = ZoomAndPan.Matrix.Transform(zoomCenter);
             Point vsDelta = new Point(vsZoomCenter.X - vsNextZoomCenter.X, vsZoomCenter.Y - vsNextZoomCenter.Y);
@@ -716,7 +712,7 @@ namespace VisualFindReferences.Core.Graph.View
             var topLeftInModelSpace = ZoomAndPan.MatrixInv.Transform(new Point(0, 0));
             var bottomRigtInModelSpace = ZoomAndPan.MatrixInv.Transform(new Point(ActualWidth, ActualHeight));
 
-            CalculateContentSize(ViewModel.Model, false, out var minX, out var maxX, out var minY, out var maxY);
+            ViewModel.Model.CalculateContentSize(null, false, out var minX, out var maxX, out var minY, out var maxY);
 
             var constraintBorderInModelSpace = ConstraintBorder / ZoomAndPan.Scale;
 
@@ -834,15 +830,15 @@ namespace VisualFindReferences.Core.Graph.View
 
             if (IsFocused)
             {
-                if (Key.Delete == e.Key)
+                if (e.Key == Key.Delete)
                 {
                     DestroySelectedNodes();
                 }
-                else if (Key.Escape == e.Key)
+                else if (e.Key == Key.Escape)
                 {
                     DeselectAllNodes();
                 }
-                else if (Key.A == e.Key)
+                else if (e.Key == Key.A)
                 {
                     if (Keyboard.IsKeyDown(Key.LeftCtrl))
                     {
@@ -853,9 +849,13 @@ namespace VisualFindReferences.Core.Graph.View
                         FitNodesToView(false);
                     }
                 }
-                else if (Key.F == e.Key)
+                else if (e.Key == Key.F)
                 {
                     FitNodesToView(true);
+                }
+                else if (e.Key == Key.L)
+                {
+                    ViewModel.ApplyLayout(true);
                 }
             }
         }
@@ -889,36 +889,6 @@ namespace VisualFindReferences.Core.Graph.View
             return area;
         }
 
-        private void CalculateContentSize(NodeGraph nodeGraph, bool bOnlySelected, out double minX, out double maxX, out double minY, out double maxY)
-        {
-            minX = double.MaxValue;
-            maxX = double.MinValue;
-            minY = double.MaxValue;
-            maxY = double.MinValue;
-
-            bool hasNodes = false;
-            foreach (var node in nodeGraph.Nodes)
-            {
-                var nodeView = node.ViewModel.View;
-                if (node.Owner == nodeGraph)
-                {
-                    if (bOnlySelected && !node.ViewModel.IsSelected)
-                        continue;
-
-                    minX = Math.Min(node.X, minX);
-                    maxX = Math.Max(node.X + nodeView?.ActualWidth ?? 0, maxX);
-                    minY = Math.Min(node.Y, minY);
-                    maxY = Math.Max(node.Y + nodeView?.ActualHeight ?? 0, maxY);
-                    hasNodes = true;
-                }
-            }
-
-            if (!hasNodes)
-            {
-                minX = maxX = minY = maxY = 0.0;
-            }
-        }
-
         public void FitNodesToView(bool bOnlySelected)
         {
             if (ViewModel == null)
@@ -926,44 +896,17 @@ namespace VisualFindReferences.Core.Graph.View
                 return;
             }
 
-            CalculateContentSize(ViewModel.Model, bOnlySelected, out var minX, out var maxX, out var minY, out var maxY);
-            if (minX == maxX || minY == maxY)
+            ViewModel.Model.CalculateContentSize(null, bOnlySelected, out var rect);
+            if (rect.Width == 0 || rect.Height == 0)
             {
                 return;
             }
 
-            double vsWidth = ZoomAndPan.ViewWidth;
-            double vsHeight = ZoomAndPan.ViewHeight;
+            var newZoomAndPan = ZoomAndPan.GetTarget(rect);
 
-            Point margin = new Point(vsWidth * 0.05, vsHeight * 0.05);
-            minX -= margin.X;
-            minY -= margin.Y;
-            maxX += margin.X;
-            maxY += margin.Y;
-
-            double contentWidth = maxX - minX;
-            double contentHeight = maxY - minY;
-
-            ZoomAndPan.StartX = (minX + maxX - vsWidth) * 0.5;
-            ZoomAndPan.StartY = (minY + maxY - vsHeight) * 0.5;
-            ZoomAndPan.Scale = 1.0;
-
-            Point vsZoomCenter = new Point(vsWidth * 0.5, vsHeight * 0.5);
-            Point zoomCenter = ZoomAndPan.MatrixInv.Transform(vsZoomCenter);
-
-            double newScale = Math.Min(vsWidth / contentWidth, vsHeight / contentHeight);
-            ZoomAndPan.Scale = ConstrainScale(newScale);
-
-            Point vsNextZoomCenter = ZoomAndPan.Matrix.Transform(zoomCenter);
-            Point vsDelta = new Point(vsZoomCenter.X - vsNextZoomCenter.X, vsZoomCenter.Y - vsNextZoomCenter.Y);
-
-            ZoomAndPan.StartX -= vsDelta.X;
-            ZoomAndPan.StartY -= vsDelta.Y;
-        }
-
-        private double ConstrainScale(double scale)
-        {
-            return Math.Max(0.05, Math.Min(3.0, scale));
+            ZoomAndPan.Scale = newZoomAndPan.Scale;
+            ZoomAndPan.StartX = newZoomAndPan.StartX;
+            ZoomAndPan.StartY = newZoomAndPan.StartY;
         }
     }
 }

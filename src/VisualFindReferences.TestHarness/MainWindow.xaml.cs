@@ -40,77 +40,35 @@ namespace VisualFindReferences.TestHarness
         {
             if (e.Key == System.Windows.Input.Key.P)
             {
-                NodeGraphViewModel.RunAction<Node>(async (setBusyText, viewModel) =>
+                NodeGraphViewModel.RunAction((setBusyText, viewModel) =>
                 {
-                    await Task.Delay(1500);
-                    setBusyText("Still going...");
-                    await Task.Delay(500);
                     var existing = viewModel.NodeViewModels.FirstOrDefault(x => x.IsSelected)?.Model;
                     if (existing == null)
                     {
                         existing = viewModel.NodeViewModels[r.Next(viewModel.NodeViewModels.Count)].Model;
                     }
-                    return existing;
+                    return Task.FromResult(existing);
                 },
-                node =>
+                (node, nodeGraph) =>
                 {
-                    var nodeGraph = NodeGraphViewModel.Model;
-
                     var n1 = CreateNode(nodeGraph, node.X, node.Y);
                     var n2 = CreateNode(nodeGraph, node.X, node.Y);
 
                     nodeGraph.Nodes.Add(n1);
                     nodeGraph.Nodes.Add(n2);
 
-                    var c1 = new Connector(nodeGraph, node, n1);
-                    var c2 = new Connector(nodeGraph, node, n2);
+                    var c1 = new Connector(nodeGraph, n1, node);
+                    var c2 = new Connector(nodeGraph, n2, node);
 
                     nodeGraph.Connectors.Add(c1);
                     nodeGraph.Connectors.Add(c2);
 
                     var view = NodeGraphViewModel.View;
-                    var nodes = new List<Tuple<Node, double, double>>();
-                    nodes.Add(Tuple.Create(n1, n1.X + 200, n1.Y - 50));
-                    nodes.Add(Tuple.Create(n2, n2.X + 200, n2.Y + 50));
+                    var nodes = new Dictionary<Node, GraphPoint>();
+                    nodes[n1] = new GraphPoint(n1.X + 200, n1.Y - 50);
+                    nodes[n2] = new GraphPoint(n2.X + 200, n2.Y + 50);
                     NodeGraphViewModel.View.StartAnimation(nodes, view.ZoomAndPan.Scale + (r.NextDouble() - 0.5), view.ZoomAndPan.StartX + ((r.NextDouble() - 0.5) * 20), view.ZoomAndPan.StartY + ((r.NextDouble() - 0.5) * 20));
                 });
-            }
-
-            if (e.Key == System.Windows.Input.Key.L)
-            {
-                var dictionary = new Dictionary<Node, Core.Graph.Layout.Point>();
-                foreach(var node in NodeGraphViewModel.Model.Nodes)
-                {
-                    dictionary[node] = new Core.Graph.Layout.Point(node.X, node.Y);
-                }
-                //var algo = new FRLayoutAlgorithm(NodeGraphViewModel.Model, dictionary);
-                //var algo = new HorizontalBalancedGridLayoutAlgorithm(NodeGraphViewModel.Model, dictionary);
-                var algo = new VerticalBalancedGridLayoutAlgorithm(NodeGraphViewModel.Model, dictionary);
-                algo.Layout();
-
-                var fsaDictionary = new Dictionary<Node, Core.Graph.Layout.Rect>();
-                foreach (var pair in dictionary)
-                {
-                    fsaDictionary[pair.Key] = new Core.Graph.Layout.Rect(pair.Value.X, pair.Value.Y, pair.Key.ViewModel.View.ActualWidth, pair.Key.ViewModel.View.ActualHeight);
-                }
-
-                var overlapRemoval = new FSAAlgorithm(fsaDictionary);
-                overlapRemoval.InternalCompute();
-
-                //foreach (var pair in fsaDictionary)
-                //{
-                //    pair.Key.X = pair.Value.X;
-                //    pair.Key.Y = pair.Value.Y;
-                //}
-
-                var view = NodeGraphViewModel.View;
-                var nodes = new List<Tuple<Node, double, double>>();
-
-                foreach (var pair in fsaDictionary)
-                {
-                    nodes.Add(Tuple.Create(pair.Key, pair.Value.X, pair.Value.Y));
-                }
-                NodeGraphViewModel.View.StartAnimation(nodes, view.ZoomAndPan.Scale, view.ZoomAndPan.StartX, view.ZoomAndPan.StartY);
             }
         }
 
@@ -151,6 +109,8 @@ namespace VisualFindReferences.TestHarness
             NodeGraph nodeGraph = new NodeGraph();
             NodeGraphViewModel = nodeGraph.ViewModel;
 
+            NodeGraphViewModel.LayoutType = LayoutAlgorithmType.VerticalBalancedGrid;
+
             bool includeBack = true;
 
             var node1 = CreateNode(nodeGraph, 1);
@@ -168,24 +128,23 @@ namespace VisualFindReferences.TestHarness
 
             node6.ViewModel.IsHighlighted = true;
 
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node1, node5));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node1, node7));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node7, node4));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node7, node6));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node6, node3));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node5, node2));
-            //nodeGraph.Connectors.Add(new Connector(nodeGraph, node4, node5));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node3));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node5, node8));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node9));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node10));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node5, node1));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node7, node1));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node4, node7));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node6, node7));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node3, node6));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node5));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node3, node2));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node8, node5));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node9, node2));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node10, node2));
 
             if (includeBack)
             {
                 var node11 = CreateNode(nodeGraph, 11);
                 var node12 = CreateNode(nodeGraph, 12);
-                nodeGraph.Connectors.Add(new Connector(nodeGraph, node11, node2));
-                nodeGraph.Connectors.Add(new Connector(nodeGraph, node12, node2));
+                nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node11));
+                nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node12));
             }
 
         }

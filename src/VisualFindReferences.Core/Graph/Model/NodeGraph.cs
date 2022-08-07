@@ -4,41 +4,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using VisualFindReferences.Core.Graph.Helper;
-using VisualFindReferences.Core.Graph.Model.Nodes;
+using VisualFindReferences.Core.Graph.Layout;
 using VisualFindReferences.Core.Graph.ViewModel;
 
 namespace VisualFindReferences.Core.Graph.Model
 {
-    public class VFRNodeGraph : NodeGraph
-    {
-        private Dictionary<ISymbol, VFRNode> _nodesByTargetSymbol = new Dictionary<ISymbol, VFRNode>(SymbolEqualityComparer.Default);
-
-        protected override void NodeAdded(Node node)
-        {
-            base.NodeAdded(node);
-
-            if (node is VFRNode vfrNode)
-            {
-                _nodesByTargetSymbol[vfrNode.NodeFoundReferences.Symbol] = vfrNode;
-            }
-        }
-
-        protected override void NodeRemoved(Node node)
-        {
-            base.NodeRemoved(node);
-
-            if (node is VFRNode vfrNode)
-            {
-                _nodesByTargetSymbol.Remove(vfrNode.NodeFoundReferences.Symbol);
-            }
-        }
-
-        public bool GetNodeFor(ISymbol symbol, out VFRNode targetNode)
-        {
-            return _nodesByTargetSymbol.TryGetValue(symbol, out targetNode);
-        }
-    }
-
     public class NodeGraph : ModelBase
     {
         public NodeGraphViewModel ViewModel { get; }
@@ -104,7 +74,7 @@ namespace VisualFindReferences.Core.Graph.Model
             }
 
             var stack = new Stack<IHighlightable>();
-            TraverseFrom(rootNode, targetNode, stack);
+            TraverseFrom(targetNode, rootNode, stack);
         }
 
         private void TraverseFrom(Node startNode, Node targetNode, Stack<IHighlightable> stack)
@@ -132,5 +102,60 @@ namespace VisualFindReferences.Core.Graph.Model
         {
             stack.Each(x => x.IsHighlighted = true);
         }
+
+        public IDictionary<Node, GraphPoint> GetLayoutPositions(LayoutAlgorithmType algorithmType)
+        {
+            var dictionary = new Dictionary<Node, GraphPoint>();
+            foreach (var node in Nodes)
+            {
+                dictionary[node] = new GraphPoint(node.X, node.Y);
+            }
+
+            var algo = LayoutAlgorithmFactory.Create(algorithmType, this, dictionary);
+            algo.Layout();
+
+            return algo.VerticesPositions;
+        }
+
+        public void CalculateContentSize(IDictionary<Node, GraphPoint>? proposedPositions, bool bOnlySelected, out GraphRect rect)
+        {
+            CalculateContentSize(proposedPositions, bOnlySelected, out var minX, out var maxX, out var minY, out var maxY);
+            rect = new GraphRect(minX, minY, maxX - minX, maxY - minY);
+        }
+
+        public void CalculateContentSize(IDictionary<Node, GraphPoint>? proposedPositions, bool bOnlySelected, out double minX, out double maxX, out double minY, out double maxY)
+        {
+            minX = double.MaxValue;
+            maxX = double.MinValue;
+            minY = double.MaxValue;
+            maxY = double.MinValue;
+
+            bool hasNodes = false;
+            foreach (var node in Nodes)
+            {
+                var nodeView = node.ViewModel.View;
+                if (bOnlySelected && !node.ViewModel.IsSelected)
+                {
+                    continue;
+                }
+
+                if (proposedPositions == null || !proposedPositions.TryGetValue(node, out var position))
+                {
+                    position = new GraphPoint(node.X, node.Y);
+                }
+
+                minX = Math.Min(position.X, minX);
+                maxX = Math.Max(position.X + nodeView?.ActualWidth ?? 0, maxX);
+                minY = Math.Min(position.Y, minY);
+                maxY = Math.Max(position.Y + nodeView?.ActualHeight ?? 0, maxY);
+                hasNodes = true;
+            }
+
+            if (!hasNodes)
+            {
+                minX = maxX = minY = maxY = 0.0;
+            }
+        }
+
     }
 }

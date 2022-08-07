@@ -6,7 +6,7 @@ namespace VisualFindReferences.Core.Graph.Layout
 {
     public class HorizontalBalancedGridLayoutAlgorithm : BalancedGridLayoutAlgorithm
     {
-        public HorizontalBalancedGridLayoutAlgorithm(NodeGraph visitedGraph, IDictionary<Node, Point> verticesPositions) : base(visitedGraph, verticesPositions)
+        public HorizontalBalancedGridLayoutAlgorithm(NodeGraph visitedGraph, IDictionary<Node, GraphPoint> verticesPositions) : base(visitedGraph, verticesPositions)
         {
         }
 
@@ -30,7 +30,7 @@ namespace VisualFindReferences.Core.Graph.Layout
                     var nodeHeight = node.ViewModel.View?.ActualHeight ?? 100;
                     var nodeX = currentX + (groupWidth - nodeWidth) / 2;
                     var nodeY = currentY + (height - nodeHeight) / 2;
-                    VerticesPositions[node] = new Point(nodeX, nodeY);
+                    VerticesPositions[node] = new GraphPoint(nodeX, nodeY);
 
                     currentY += height + yGap;
                 }

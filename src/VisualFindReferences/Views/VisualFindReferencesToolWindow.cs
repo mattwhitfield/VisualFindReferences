@@ -1,10 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -29,6 +27,11 @@ namespace VisualFindReferences.Views
             base.Content = _host = new VisualFindReferencesHost();
         }
 
+        public void Clear()
+        {
+            _host.Model.Nodes.ToList().Each(x => _host.Model.Nodes.Remove(x));
+        }
+
         public void FindReferences(IWpfTextView textView, IVisualFindReferencesPackage package)
         {
             async Task<FoundReferences> FindReferencesAsync(Action<string> updateText, NodeGraphViewModel viewModel)
@@ -39,15 +42,22 @@ namespace VisualFindReferences.Views
 
                 if (syntaxNode != null)
                 {
-                    updateText("Locating references...");
-                    var declaredSymbol = semanticModel.GetDeclaredSymbol(syntaxNode);
-                    if (declaredSymbol != null)
+                    if (NodeFactory.IsSupportedContainer(syntaxNode))
                     {
-                        return await SymbolProcessor.FindReferencesAsync(updateText, declaredSymbol, syntaxNode, semanticModel, document);
+                        var declaredSymbol = semanticModel.GetDeclaredSymbol(syntaxNode);
+                        if (declaredSymbol != null)
+                        {
+                            var searchingSymbol = new SyntaxNodeWithSymbol(declaredSymbol, syntaxNode, semanticModel);
+                            return await SymbolProcessor.FindReferencesAsync(updateText, searchingSymbol, declaredSymbol, document.Project.Solution);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Could not find a declared symbol at the caret position.");
+                        }
                     }
                     else
                     {
-                        throw new InvalidOperationException("Could not find a declared symbol at the caret position.");
+                        throw new InvalidOperationException("SyntaxNode of type " + syntaxNode.GetType().Name + " are not supported.");
                     }
                 }
                 else
@@ -56,39 +66,14 @@ namespace VisualFindReferences.Views
                 }
             }
 
-            void ProcessFoundReferences(FoundReferences references)
-            {
-                _host.Model.Nodes.OfType<VFRNode>().Each(x => x.ReferenceLocationsAdded = false);
+            
 
-                if (!_host.Model.GetNodeFor(references.Symbol, out var targetNode))
-                {
-                    targetNode = NodeFactory.Create(references.SyntaxNode, _host.Model, references);
-                    _host.Model.Nodes.Add(targetNode);
-                }
-                targetNode.ReferenceSearchAvailable = false;
+            _host.ViewModel.RunAction(FindReferencesAsync, SymbolProcessor.ProcessFoundReferences);
+        }
 
-                if (references.ReferencingSymbols != null)
-                {
-                    foreach (var referencingSymbol in references.ReferencingSymbols)
-                    {
-                        if (!_host.Model.GetNodeFor(referencingSymbol.Symbol, out var referencingNode))
-                        {
-                            var referencingNodeReferences = new FoundReferences(referencingSymbol.Symbol, referencingSymbol.SyntaxNode, referencingSymbol.SemanticModel, referencingSymbol.ReferencingLocations);
-                            referencingNode = NodeFactory.Create(referencingSymbol.SyntaxNode, _host.Model, referencingNodeReferences);
-                            _host.Model.Nodes.Add(referencingNode);
-                        }
-                        else
-                        {
-                            referencingSymbol.ReferencingLocations.Each(referencingNode.NodeFoundReferences.ReferencingLocations.Add);
-                            referencingNode.ReferenceLocationsAdded = referencingSymbol.ReferencingLocations.Count > 0;
-                        }
-
-                        _host.Model.Connectors.Add(new Connector(_host.Model, referencingNode, targetNode));
-                    }
-                }
-            }
-
-            _host.ViewModel.RunAction(FindReferencesAsync, ProcessFoundReferences);
+        internal void SetPackage(VisualFindReferencesPackage visualFindReferencesPackage)
+        {
+            _host.SetPackage(visualFindReferencesPackage);
         }
     }
 }

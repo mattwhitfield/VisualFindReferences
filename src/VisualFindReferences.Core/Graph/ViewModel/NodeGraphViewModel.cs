@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using VisualFindReferences.Core.Graph.Helper;
+using VisualFindReferences.Core.Graph.Layout;
 using VisualFindReferences.Core.Graph.Model;
 using VisualFindReferences.Core.Graph.View;
 
@@ -51,7 +52,7 @@ namespace VisualFindReferences.Core.Graph.ViewModel
             }
         }
 
-        public void RunAction<T>(Func<Action<string>, NodeGraphViewModel, Task<T>> task, Action<T> continuation)
+        public void RunAction<T>(Func<Action<string>, NodeGraphViewModel, Task<T>> task, Action<T, NodeGraph> continuation)
         {
             IsBusy = true;
             BusyText = "Loading...";
@@ -64,7 +65,7 @@ namespace VisualFindReferences.Core.Graph.ViewModel
                     View?.Dispatcher.Invoke(new Action(() =>
                     {
                         IsBusy = false;
-                        continuation(result);
+                        continuation(result, Model);
                     }));
                 }
                 catch (Exception e)
@@ -72,15 +73,48 @@ namespace VisualFindReferences.Core.Graph.ViewModel
                     View?.Dispatcher.Invoke(new Action(() =>
                     {
                         IsBusy = false;
-                        MessageBox.Show("Error occurred while getting information: " + e.Message, "Error occurred", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Error occurred while executing operation: " + e.Message, "Error occurred", MessageBoxButton.OK, MessageBoxImage.Error);
                     }));
                 }
             });
         }
 
+        public void ApplyLayout(bool fitToDisplay)
+        {
+            if (View != null)
+            {
+                var positions = Model.GetLayoutPositions(LayoutType);
+
+                var proposedZoomAndPan = View.ZoomAndPan;
+
+                if (fitToDisplay)
+                {
+                    Model.CalculateContentSize(positions, false, out var rect);
+                    proposedZoomAndPan = View.ZoomAndPan.GetTarget(rect);
+                }
+
+                View.StartAnimation(positions, proposedZoomAndPan.Scale, proposedZoomAndPan.StartX, proposedZoomAndPan.StartY);
+            }
+        }
+
         private void SetBusyText(string text)
         {
             View?.Dispatcher.Invoke(new Action(() => BusyText = text));
+        }
+
+        private LayoutAlgorithmType _layoutType = LayoutAlgorithmType.VerticalBalancedGrid;
+
+        public LayoutAlgorithmType LayoutType
+        {
+            get { return _layoutType; }
+            set
+            {
+                if (value != _layoutType)
+                {
+                    _layoutType = value;
+                    RaisePropertyChanged(nameof(LayoutType));
+                }
+            }
         }
 
         private bool _isBusy;

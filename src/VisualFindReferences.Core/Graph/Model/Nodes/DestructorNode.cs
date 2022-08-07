@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace VisualFindReferences.Core.Graph.Model.Nodes
 {
@@ -8,5 +9,12 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
 
         public DestructorNode(NodeGraph flowChart, FoundReferences foundReferences) : base(flowChart, foundReferences, DefaultIcon, Brushes.Purple)
         { }
+
+        public override string NodeSymbolType => "Destructor";
+
+        public override IEnumerable<SearchableSymbol> GetSearchableSymbols()
+        {
+            yield break;
+        }
     }
 }

@@ -39,7 +39,9 @@
             }
             var windowFrame = (IVsWindowFrame)window.Frame;
             ErrorHandler.ThrowOnFailure(windowFrame.Show());
-            return window as VisualFindReferencesToolWindow;
+            var toolWin = window as VisualFindReferencesToolWindow;
+            toolWin?.SetPackage(this);
+            return toolWin;
         }
 
 

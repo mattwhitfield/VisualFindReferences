@@ -1,4 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 using System.Windows.Media;
 
 namespace VisualFindReferences.Core.Graph.Model.Nodes
@@ -10,6 +12,8 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
             NodeFoundReferences = foundReferences;
             ReferenceSearchAvailable = foundReferences.IsSource;
         }
+
+        public abstract string NodeSymbolType { get; }
 
         public bool ReferenceSearchAvailable { get; set; }
 
@@ -49,5 +53,7 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
 
             return string.Empty;
         }
+
+        public abstract IEnumerable<SearchableSymbol> GetSearchableSymbols();
     }
 }

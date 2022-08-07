@@ -1,4 +1,7 @@
-﻿using System.Windows.Media;
+﻿using System;
+using System.Windows;
+using System.Windows.Media;
+using VisualFindReferences.Core.Graph.Layout;
 
 namespace VisualFindReferences.Core.Graph.View
 {
@@ -111,5 +114,50 @@ namespace VisualFindReferences.Core.Graph.View
         public delegate void UpdateTransformDelegate();
 
         public event UpdateTransformDelegate? UpdateTransform;
+
+        public ZoomAndPan GetTarget(GraphRect area)
+        {
+            var vsWidth = ViewWidth;
+            var vsHeight = ViewHeight;
+
+            var minX = area.Left;
+            var minY = area.Top;
+            var maxX = area.Right;
+            var maxY = area.Bottom;
+
+            var zoomAndPan = new ZoomAndPan();
+
+            Point margin = new Point(vsWidth * 0.05, vsHeight * 0.05);
+            minX -= margin.X;
+            minY -= margin.Y;
+            maxX += margin.X;
+            maxY += margin.Y;
+
+            double contentWidth = maxX - minX;
+            double contentHeight = maxY - minY;
+
+            zoomAndPan.StartX = (minX + maxX - vsWidth) * 0.5;
+            zoomAndPan.StartY = (minY + maxY - vsHeight) * 0.5;
+            zoomAndPan.Scale = 1.0;
+
+            Point vsZoomCenter = new Point(vsWidth * 0.5, vsHeight * 0.5);
+            Point zoomCenter = zoomAndPan.MatrixInv.Transform(vsZoomCenter);
+
+            double newScale = Math.Min(vsWidth / contentWidth, vsHeight / contentHeight);
+            zoomAndPan.Scale = ConstrainScale(newScale);
+
+            Point vsNextZoomCenter = zoomAndPan.Matrix.Transform(zoomCenter);
+            Point vsDelta = new Point(vsZoomCenter.X - vsNextZoomCenter.X, vsZoomCenter.Y - vsNextZoomCenter.Y);
+
+            zoomAndPan.StartX -= vsDelta.X;
+            zoomAndPan.StartY -= vsDelta.Y;
+
+            return zoomAndPan;
+        }
+
+        public static double ConstrainScale(double scale)
+        {
+            return Math.Max(0.05, Math.Min(3.0, scale));
+        }
     }
 }

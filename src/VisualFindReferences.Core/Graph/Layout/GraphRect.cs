@@ -2,11 +2,11 @@
 
 namespace VisualFindReferences.Core.Graph.Layout
 {
-    public struct Rect : IEquatable<Rect>
+    public struct GraphRect : IEquatable<GraphRect>
     {
-        public Point GetCenter()
+        public GraphPoint GetCenter()
         {
-            return new Point(
+            return new GraphPoint(
                 Left + Width / 2,
                 Top + Height / 2);
         }
@@ -19,7 +19,7 @@ namespace VisualFindReferences.Core.Graph.Layout
 
         public double Height { get; set; }
 
-        public Rect(double x, double y, double width, double height)
+        public GraphRect(double x, double y, double width, double height)
         {
             X = x;
             Y = y;
@@ -27,17 +27,17 @@ namespace VisualFindReferences.Core.Graph.Layout
             Height = height;
         }
 
-        public static bool operator ==(Rect rect1, Rect rect2)
+        public static bool operator ==(GraphRect rect1, GraphRect rect2)
         {
             return Equals(rect1, rect2);
         }
 
-        public static bool operator !=(Rect rect1, Rect rect2)
+        public static bool operator !=(GraphRect rect1, GraphRect rect2)
         {
             return !(rect1 == rect2);
         }
 
-        public static bool Equals(Rect rect1, Rect rect2)
+        public static bool Equals(GraphRect rect1, GraphRect rect2)
         {
             return MathUtils.NearEqual(rect1.X, rect2.X)
                    && MathUtils.NearEqual(rect1.Y, rect2.Y)
@@ -47,10 +47,10 @@ namespace VisualFindReferences.Core.Graph.Layout
 
         public override bool Equals(object obj)
         {
-            return obj is Rect rect && Equals(this, rect);
+            return obj is GraphRect rect && Equals(this, rect);
         }
 
-        public bool Equals(Rect other)
+        public bool Equals(GraphRect other)
         {
             return Equals(this, other);
         }
@@ -68,7 +68,7 @@ namespace VisualFindReferences.Core.Graph.Layout
 
         public double Bottom => Y + Height;
 
-        public bool IntersectsWith(Rect rect)
+        public bool IntersectsWith(GraphRect rect)
         {
             return rect.Left <= Right && rect.Right >= Left && rect.Top <= Bottom && rect.Bottom >= Top;
         }
