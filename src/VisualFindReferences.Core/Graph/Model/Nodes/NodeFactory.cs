@@ -25,6 +25,10 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
             { typeof(LocalFunctionStatementSyntax), (graph, foundReferences) => new LocalMethodNode(graph, foundReferences) },
             { typeof(MethodDeclarationSyntax), (graph, foundReferences) => new MethodNode(graph, foundReferences) },
             { typeof(VariableDeclaratorSyntax), (graph, foundReferences) => new FieldInitializerNode(graph, foundReferences) },
+            { typeof(ClassDeclarationSyntax), (graph, foundReferences) => new ClassNode(graph, foundReferences) },
+            { typeof(StructDeclarationSyntax), (graph, foundReferences) => new StructNode(graph, foundReferences) },
+            { typeof(RecordDeclarationSyntax), (graph, foundReferences) => new RecordNode(graph, foundReferences) },
+            { typeof(InterfaceDeclarationSyntax), (graph, foundReferences) => new InterfaceNode(graph, foundReferences) },
         };
 
         private static readonly Dictionary<Type, Func<SyntaxNode, bool>> _validators = new Dictionary<Type, Func<SyntaxNode, bool>>

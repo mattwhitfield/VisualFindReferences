@@ -98,26 +98,26 @@ jobs:
       id: create_release
       uses: actions/create-release@v1
       env:
-        github_token: ${{ secrets.github_token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{env.autoversion_semver}}
         release_name: ${{env.autoversion_semver}}
         body: 'VisualFindReferences v${{env.autoversion_semver}}'
         draft: false
         prerelease: false
-    - name: upload visual find references for visual studio 2019 to release assets
+    - name: Upload Visual Find References for Visual Studio 2019 to release assets
       uses: actions/upload-release-asset@v1
       env:
-        github_token: ${{ secrets.github_token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: 'dist/VisualFindReferencesVS2019.vsix'
         asset_name: 'VisualFindReferences.VS2019.vsix'
         asset_content_type: binary/octet-stream
-    - name: upload visual find references for visual studio 2019 to release assets
+    - name: Upload Visual Find References for Visual Studio 2022 to release assets
       uses: actions/upload-release-asset@v1
       env:
-        github_token: ${{ secrets.github_token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: 'dist/VisualFindReferencesVS2022.vsix'
