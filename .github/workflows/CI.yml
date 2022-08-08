@@ -74,7 +74,7 @@ jobs:
       with:
         name: VisualFindReferences-VSIX-${{ matrix.VsTargetVersion }}
         path: ${{ env.VsixPath }}
-        
+
   release-extension:
     if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && needs.pre_job.outputs.should_skip != 'true'
     needs: [build, pre_job]
@@ -84,25 +84,25 @@ jobs:
       with:
         fetch-depth: '0'
     - run: |
-        ./.github/workflows/autoversion.ps1
+        ./.github/workflows/AutoVersion.ps1
       shell: pwsh 
     - uses: actions/download-artifact@master
       with:
-        name: VisualFindReferences-VSIX-VS2022
+        name: VisualFindReferences-VSIX-VS2019
         path: dist/
     - uses: actions/download-artifact@master
       with:
         name: VisualFindReferences-VSIX-VS2022
         path: dist/
-    - name: create github release
+    - name: Create Github Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{env.autoversion_semver}}
-        release_name: ${{env.autoversion_semver}}
-        body: 'VisualFindReferences v${{env.autoversion_semver}}'
+        tag_name: ${{env.AutoVersion_SemVer}}
+        release_name: ${{env.AutoVersion_SemVer}}
+        body: 'VisualFindReferences v${{env.AutoVersion_SemVer}}'
         draft: false
         prerelease: false
     - name: Upload Visual Find References for Visual Studio 2019 to release assets
@@ -123,17 +123,17 @@ jobs:
         asset_path: 'dist/VisualFindReferencesVS2022.vsix'
         asset_name: 'VisualFindReferences.VS2022.vsix'
         asset_content_type: binary/octet-stream
-    # - name: publish 2022 extension to marketplace
+    # - name: Publish 2022 extension to Marketplace
       # if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-      # uses: cezarypiatek/vsixpublisheraction@0.1
+      # uses: cezarypiatek/VsixPublisherAction@0.1
       # with:
-        # extension-file: 'dist/visualfindreferencesvs2022.vsix'
-        # publish-manifest-file: 'publishmanifestvs2022.json'
-        # personal-access-code: ${{ secrets.visualfindreferences_publisher_access_token }}      
-    # - name: publish 2019 extension to marketplace
+        # extension-file: 'dist/VisualFindReferencesVS2022.vsix'
+        # publish-manifest-file: 'publishManifestVS2022.json'
+        # personal-access-code: ${{ secrets.VISUALFINDREFERENCES_PUBLISHER_ACCESS_TOKEN }}      
+    # - name: Publish 2019 extension to Marketplace
       # if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-      # uses: cezarypiatek/vsixpublisheraction@0.1
+      # uses: cezarypiatek/VsixPublisherAction@0.1
       # with:
-        # extension-file: 'dist/visualfindreferencesvs2019.vsix'
-        # publish-manifest-file: 'publishmanifestvs2019.json'
-        # personal-access-code: ${{ secrets.visualfindreferences_publisher_access_token }}      
+        # extension-file: 'dist/VisualFindReferencesVS2019.vsix'
+        # publish-manifest-file: 'publishManifestVS2019.json'
+        # personal-access-code: ${{ secrets.VISUALFINDREFERENCES_PUBLISHER_ACCESS_TOKEN }}      
