@@ -88,11 +88,11 @@ jobs:
       shell: pwsh 
     - uses: actions/download-artifact@master
       with:
-        name: visualfindreferences-vsix-vs2019
+        name: VisualFindReferences-VSIX-VS2022
         path: dist/
     - uses: actions/download-artifact@master
       with:
-        name: visualfindreferences-vsix-vs2022
+        name: VisualFindReferences-VSIX-VS2022
         path: dist/
     - name: create github release
       id: create_release
@@ -102,7 +102,7 @@ jobs:
       with:
         tag_name: ${{env.autoversion_semver}}
         release_name: ${{env.autoversion_semver}}
-        body: 'visualfindreferences v${{env.autoversion_semver}}'
+        body: 'VisualFindReferences v${{env.autoversion_semver}}'
         draft: false
         prerelease: false
     - name: upload visual find references for visual studio 2019 to release assets
@@ -111,8 +111,8 @@ jobs:
         github_token: ${{ secrets.github_token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: 'dist/visualfindreferencesvs2019.vsix'
-        asset_name: 'visualfindreferences.vs2019.vsix'
+        asset_path: 'dist/VisualFindReferencesVS2019.vsix'
+        asset_name: 'VisualFindReferences.VS2019.vsix'
         asset_content_type: binary/octet-stream
     - name: upload visual find references for visual studio 2019 to release assets
       uses: actions/upload-release-asset@v1
@@ -120,8 +120,8 @@ jobs:
         github_token: ${{ secrets.github_token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: 'dist/visualfindreferencesvs2022.vsix'
-        asset_name: 'visualfindreferences.vs2022.vsix'
+        asset_path: 'dist/VisualFindReferencesVS2022.vsix'
+        asset_name: 'VisualFindReferences.VS2022.vsix'
         asset_content_type: binary/octet-stream
     # - name: publish 2022 extension to marketplace
       # if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
