@@ -21,10 +21,15 @@ namespace VisualFindReferences.Core.Graph.Model
 
         public NodeGraph()
         {
-            ViewModel = new NodeGraphViewModel(this);
+            ViewModel = CreateViewModel();
 
             Nodes.CollectionChanged += Nodes_CollectionChanged;
             Connectors.CollectionChanged += Connectors_CollectionChanged;
+        }
+
+        protected virtual NodeGraphViewModel CreateViewModel()
+        {
+            return new NodeGraphViewModel(this);
         }
 
         private void Nodes_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

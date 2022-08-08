@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
@@ -42,6 +43,15 @@ namespace VisualFindReferences.Views
 
                 if (syntaxNode != null)
                 {
+                    if (!NodeFactory.IsSupportedContainer(syntaxNode))
+                    {
+                        var parameterList = syntaxNode.AncestorsAndSelf().OfType<ParameterListSyntax>().FirstOrDefault();
+                        if (parameterList != null && NodeFactory.IsSupportedContainer(parameterList.Parent))
+                        {
+                            syntaxNode = parameterList.Parent;
+                        }
+                    }
+
                     if (NodeFactory.IsSupportedContainer(syntaxNode))
                     {
                         var declaredSymbol = semanticModel.GetDeclaredSymbol(syntaxNode);
@@ -65,8 +75,6 @@ namespace VisualFindReferences.Views
                     throw new InvalidOperationException("Could not find a syntax node at the caret position.");
                 }
             }
-
-            
 
             _host.ViewModel.RunAction(FindReferencesAsync, SymbolProcessor.ProcessFoundReferences);
         }

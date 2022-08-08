@@ -65,6 +65,7 @@ namespace VisualFindReferences.Core.Graph.ViewModel
                     View?.Dispatcher.Invoke(new Action(() =>
                     {
                         IsBusy = false;
+                        HandleContinuation(result);
                         continuation(result, Model);
                     }));
                 }
@@ -78,6 +79,9 @@ namespace VisualFindReferences.Core.Graph.ViewModel
                 }
             });
         }
+
+        protected virtual void HandleContinuation<T>(T result)
+        { }
 
         public void ApplyLayout(bool fitToDisplay)
         {

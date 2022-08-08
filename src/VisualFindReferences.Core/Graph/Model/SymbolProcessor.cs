@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using VisualFindReferences.Core.Graph.Helper;
 using VisualFindReferences.Core.Graph.Model.Nodes;
+using VisualFindReferences.Core.Graph.ViewModel;
 
 namespace VisualFindReferences.Core.Graph.Model
 {
@@ -71,13 +72,15 @@ namespace VisualFindReferences.Core.Graph.Model
         public static void ProcessFoundReferences(FoundReferences references, NodeGraph model)
         {
             var vfrModel = model as VFRNodeGraph;
-            if (vfrModel == null)
+            var viewModel = vfrModel?.ViewModel as VFRNodeGraphViewModel;
+            if (vfrModel == null || viewModel == null)
             {
                 return;
             }
 
             // reset ReferenceLocationsAdded flags
             vfrModel.Nodes.OfType<VFRNode>().Each(x => x.ReferenceLocationsAdded = false);
+            viewModel.FilteredReferencesMessage = string.Empty;
 
             // if the target doesn't exist, create it
             if (!vfrModel.GetNodeFor(references.Symbol, out var targetNode))
@@ -97,8 +100,12 @@ namespace VisualFindReferences.Core.Graph.Model
             }
             targetNode.ReferenceSearchAvailable = false;
 
+            var filteredReferenceCount = 0;
+
             if (references.ReferencingSymbols != null)
             {
+                Func<Project, bool> projectIsIncluded = viewModel.GetProjectFilter();
+
                 // build map of connectors to avoid duplicating connectors
                 Dictionary<Node, HashSet<Node>> connectorMap = new Dictionary<Node, HashSet<Node>>();
                 foreach (var connector in vfrModel.Connectors)
@@ -112,10 +119,17 @@ namespace VisualFindReferences.Core.Graph.Model
 
                 foreach (var referencingSymbol in references.ReferencingSymbols)
                 {
+                    var referencingLocationsInAllowedProjects = referencingSymbol.ReferencingLocations.Where(x => projectIsIncluded(x.Location.Document.Project)).ToList();
+                    filteredReferenceCount += referencingSymbol.ReferencingLocations.Count - referencingLocationsInAllowedProjects.Count;
+                    if (referencingLocationsInAllowedProjects.Count == 0)
+                    {
+                        continue;
+                    }
+
                     // either create a new node or add a referencing location to an existing node
                     if (!vfrModel.GetNodeFor(referencingSymbol.Symbol, out var referencingNode))
                     {
-                        var referencingNodeReferences = new FoundReferences(referencingSymbol.Symbol, referencingSymbol.SyntaxNode, referencingSymbol.SemanticModel, references.Solution, referencingSymbol.ReferencingLocations);
+                        var referencingNodeReferences = new FoundReferences(referencingSymbol.Symbol, referencingSymbol.SyntaxNode, referencingSymbol.SemanticModel, references.Solution, referencingLocationsInAllowedProjects);
                         referencingNode = NodeFactory.Create(referencingSymbol.SyntaxNode, vfrModel, referencingNodeReferences);
                         if (referencingNode != null)
                         {
@@ -124,8 +138,8 @@ namespace VisualFindReferences.Core.Graph.Model
                     }
                     else
                     {
-                        referencingSymbol.ReferencingLocations.Each(referencingNode.NodeFoundReferences.ReferencingLocations.Add);
-                        referencingNode.ReferenceLocationsAdded = referencingSymbol.ReferencingLocations.Count > 0;
+                        referencingLocationsInAllowedProjects.Each(referencingNode.NodeFoundReferences.ReferencingLocations.Add);
+                        referencingNode.ReferenceLocationsAdded = referencingLocationsInAllowedProjects.Count > 0;
                     }
 
                     // create the link, avoiding duplicates
@@ -138,6 +152,11 @@ namespace VisualFindReferences.Core.Graph.Model
                         }
                     }
                 }
+            }
+
+            if (filteredReferenceCount > 0)
+            {
+                viewModel.FilteredReferencesMessage = "References filtered: " + filteredReferenceCount;
             }
         }
     }

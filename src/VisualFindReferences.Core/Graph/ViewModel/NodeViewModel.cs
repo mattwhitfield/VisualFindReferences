@@ -24,7 +24,7 @@ namespace VisualFindReferences.Core.Graph.ViewModel
                 if (value != _isSelected)
                 {
                     _isSelected = value;
-                    RaisePropertyChanged("IsSelected");
+                    RaisePropertyChanged(nameof(IsSelected));
                 }
             }
         }
@@ -39,7 +39,7 @@ namespace VisualFindReferences.Core.Graph.ViewModel
                 if (value != _isHighlighted)
                 {
                     _isHighlighted = value;
-                    RaisePropertyChanged("IsHighlighted");
+                    RaisePropertyChanged(nameof(IsHighlighted));
                 }
             }
         }

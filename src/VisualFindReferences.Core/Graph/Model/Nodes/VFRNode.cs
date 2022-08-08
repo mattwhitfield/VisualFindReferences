@@ -11,7 +11,13 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
         {
             NodeFoundReferences = foundReferences;
             ReferenceSearchAvailable = foundReferences.IsSource;
+            NamespaceName = foundReferences.Symbol.ContainingNamespace.ToDisplayString();
+            AssemblyName = foundReferences.Symbol.ContainingAssembly.Name;
         }
+
+        public string NamespaceName { get; }
+
+        public string AssemblyName { get; }
 
         public abstract string NodeSymbolType { get; }
 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using VisualFindReferences.Core.Graph.Model.Nodes;
+using VisualFindReferences.Core.Graph.ViewModel;
 
 namespace VisualFindReferences.Core.Graph.Model
 {
@@ -31,6 +32,11 @@ namespace VisualFindReferences.Core.Graph.Model
         public bool GetNodeFor(ISymbol symbol, out VFRNode targetNode)
         {
             return _nodesByTargetSymbol.TryGetValue(symbol, out targetNode);
+        }
+
+        protected override NodeGraphViewModel CreateViewModel()
+        {
+            return new VFRNodeGraphViewModel(this);
         }
     }
 }

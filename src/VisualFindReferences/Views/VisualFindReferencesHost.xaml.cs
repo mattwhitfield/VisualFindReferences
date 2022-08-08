@@ -7,11 +7,13 @@
     using Microsoft.VisualStudio.TextManager.Interop;
     using System;
     using System.Threading.Tasks;
+    using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
     using VisualFindReferences.Core.Graph.Helper;
     using VisualFindReferences.Core.Graph.Model;
     using VisualFindReferences.Core.Graph.Model.Nodes;
+    using VisualFindReferences.Core.Graph.View;
     using VisualFindReferences.Core.Graph.ViewModel;
 
     /// <summary>
@@ -25,7 +27,7 @@
         {
             InitializeComponent();
             Model = new VFRNodeGraph();
-            GraphView.DataContext = ViewModel = Model.ViewModel;
+            IgnoredPromptPopup.DataContext = GraphView.DataContext = ViewModel = Model.ViewModel;
         }
 
         public NodeGraphViewModel ViewModel { get; }
@@ -34,9 +36,11 @@
 
         private void NodeGraphViewNodeContextMenuRequested(object sender, Core.Graph.View.ContextMenuEventArgs e)
         {
-            var contextMenu = new ContextMenu();
+            var contextMenu = (ContextMenu)FindResource("NodeContextMenu");
+            contextMenu.Items.Clear();
 
             contextMenu.Items.Add(new MenuItem { Header = "Delete node", Command = GetDeleteCommand(e.Node) });
+
             if (e.Node is VFRNode vfrNode)
             {
                 if (vfrNode.ReferenceSearchAvailable)

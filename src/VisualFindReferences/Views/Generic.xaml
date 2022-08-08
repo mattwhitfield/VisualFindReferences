@@ -6,11 +6,6 @@
     xmlns:platformUI="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
     xmlns:v="clr-namespace:VisualFindReferences.Core.Graph.View;assembly=VisualFindReferences.Core">
 
-    <SolidColorBrush x:Key="ViewBackGroundColor" Color="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowBackgroundColorKey}}" />
-    <SolidColorBrush x:Key="ViewTextColor" Color="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextColorKey}}" />
-    <SolidColorBrush x:Key="NodeBackGroundColor" Color="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabGradientBeginColorKey}}" />
-    <SolidColorBrush x:Key="NodeBorderColor" Color="{DynamicResource {x:Static platformUI:CommonDocumentColors.InnerTabActiveIndicatorColorKey}}" />
-
     <Style x:Key="DefaultConnectorViewStyle" TargetType="{x:Type v:ConnectorView}">
         <Setter Property="Template">
             <Setter.Value>
@@ -18,7 +13,7 @@
                     <Path
                         x:Name="ConnectorPath"
                         Data="{Binding Path=CurveData, RelativeSource={RelativeSource AncestorType={x:Type v:ConnectorView}}}"
-                        Stroke="{StaticResource ViewTextColor}"
+                        Stroke="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
                         StrokeThickness="2" />
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
@@ -42,10 +37,11 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Path
                 Grid.Row="0"
-                Grid.RowSpan="4"
                 Grid.Column="0"
                 Width="24"
                 Height="24"
@@ -58,48 +54,82 @@
                 Grid.Row="0"
                 Grid.Column="1"
                 Grid.ColumnSpan="2"
-                Margin="4,0,0,0"
+                Margin="6,0,0,0"
                 HorizontalAlignment="Left"
+                VerticalAlignment="Center"
                 FontSize="11"
-                Foreground="{StaticResource ViewTextColor}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
                 Text="{Binding NodeSymbolType, Mode=OneTime}" />
             <TextBlock
                 Grid.Row="1"
                 Grid.Column="1"
-                Margin="4,2,0,0"
+                Margin="6,4,0,0"
                 HorizontalAlignment="Right"
                 FontSize="14"
-                Foreground="{StaticResource ViewTextColor}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
                 Text="Symbol:" />
             <TextBlock
                 Grid.Row="2"
                 Grid.Column="1"
-                Margin="4,2,0,0"
+                Margin="6,4,0,0"
                 HorizontalAlignment="Right"
                 FontSize="11"
-                Foreground="{StaticResource ViewTextColor}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
                 Text="Type:" />
+            <TextBlock
+                Grid.Row="3"
+                Grid.Column="1"
+                Margin="6,4,0,0"
+                HorizontalAlignment="Right"
+                FontSize="11"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Text="Namespace:" />
+            <TextBlock
+                Grid.Row="4"
+                Grid.Column="1"
+                Margin="6,4,0,0"
+                HorizontalAlignment="Right"
+                FontSize="11"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Text="Assembly:" />
             <TextBlock
                 Grid.Row="1"
                 Grid.Column="2"
-                Margin="4,2,0,0"
+                Margin="6,4,0,0"
                 HorizontalAlignment="Left"
                 FontSize="14"
                 FontWeight="Bold"
-                Foreground="{StaticResource ViewTextColor}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
                 Text="{Binding ContainerName, Mode=OneTime}" />
             <TextBlock
                 Grid.Row="2"
                 Grid.Column="2"
-                Margin="4,2,0,0"
+                Margin="6,4,0,0"
                 HorizontalAlignment="Left"
                 FontSize="11"
-                Foreground="{StaticResource ViewTextColor}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
                 Text="{Binding TypeName, Mode=OneTime}" />
-            <StackPanel
+            <TextBlock
                 Grid.Row="3"
+                Grid.Column="2"
+                Margin="6,4,0,0"
+                HorizontalAlignment="Left"
+                FontSize="11"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Text="{Binding NamespaceName, Mode=OneTime}" />
+            <TextBlock
+                Grid.Row="4"
+                Grid.Column="2"
+                Margin="6,4,0,0"
+                HorizontalAlignment="Left"
+                FontSize="11"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Text="{Binding AssemblyName, Mode=OneTime}" />
+            <StackPanel
+                Grid.Row="5"
                 Grid.Column="1"
                 Grid.ColumnSpan="2"
+                Margin="6,8,0,0"
                 Orientation="Vertical">
                 <ItemsControl ItemsSource="{Binding NodeFoundReferences.ReferencingLocations}">
                     <ItemsControl.ItemTemplate>
@@ -107,13 +137,13 @@
                             <StackPanel Margin="0,4,0,0" Orientation="Vertical">
                                 <TextBlock
                                     FontSize="11"
-                                    Foreground="{StaticResource ViewTextColor}"
+                                    Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
                                     Text="{Binding LinePrompt, Mode=OneTime}" />
                                 <TextBlock
-                                    Margin="16,0,0,0"
+                                    Margin="24,2,0,0"
                                     FontFamily="Lucida Console"
                                     FontSize="11"
-                                    Foreground="{StaticResource ViewTextColor}"
+                                    Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
                                     Text="{Binding Text, Mode=OneTime}" />
                             </StackPanel>
                         </DataTemplate>
@@ -124,9 +154,9 @@
     </DataTemplate>
 
     <Style x:Key="DefaultNodeViewStyle" TargetType="{x:Type v:NodeView}">
-        <Setter Property="Background" Value="{StaticResource NodeBackGroundColor}" />
-        <Setter Property="Foreground" Value="{StaticResource ViewTextColor}" />
-        <Setter Property="BorderBrush" Value="{StaticResource NodeBorderColor}" />
+        <Setter Property="Background" Value="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabGradientBeginBrushKey}}" />
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static platformUI:CommonDocumentColors.InnerTabActiveIndicatorBrushKey}}" />
         <Setter Property="Canvas.Left" Value="{Binding Model.X}" />
         <Setter Property="Canvas.Top" Value="{Binding Model.Y}" />
         <Setter Property="MinWidth" Value="120" />
@@ -144,8 +174,8 @@
                                         <Grid>
                                             <Border
                                                 Padding="4"
-                                                Background="{StaticResource NodeBackGroundColor}"
-                                                BorderBrush="{StaticResource NodeBorderColor}"
+                                                Background="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabGradientBeginBrushKey}}"
+                                                BorderBrush="{DynamicResource {x:Static platformUI:CommonDocumentColors.InnerTabActiveIndicatorBrushKey}}"
                                                 BorderThickness="2"
                                                 CornerRadius="5">
                                                 <ContentControl Content="{TemplateBinding Content}" ContentTemplate="{StaticResource NodeViewTooltipTemplate}" />
@@ -153,7 +183,7 @@
                                             <Border
                                                 Padding="4"
                                                 Background="Transparent"
-                                                BorderBrush="{StaticResource ViewBackGroundColor}"
+                                                BorderBrush="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowBackgroundBrushKey}}"
                                                 BorderThickness="2"
                                                 CornerRadius="5"
                                                 Opacity="0.75" />
@@ -243,13 +273,14 @@
     </Style>
 
     <Style x:Key="DefaultNodeGraphViewStyle" TargetType="{x:Type v:NodeGraphView}">
-        <Setter Property="Background" Value="{StaticResource ViewBackGroundColor}" />
-        <Setter Property="Foreground" Value="{StaticResource ViewTextColor}" />
+        <Setter Property="Background" Value="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowBackgroundBrushKey}}" />
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type v:NodeGraphView}">
                     <ControlTemplate.Resources>
                         <ResourceDictionary>
+
                             <ControlTemplate x:Key="LoadingContainerVisualSource" TargetType="v:LoadingContainer">
                                 <Grid>
                                     <Grid x:Name="PART_Content">
@@ -258,7 +289,7 @@
 
                                     <Border
                                         x:Name="PART_Border"
-                                        Background="{StaticResource ViewBackGroundColor}"
+                                        Background="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowBackgroundBrushKey}}"
                                         IsHitTestVisible="True"
                                         Opacity="0.5"
                                         Visibility="Collapsed" />
@@ -278,7 +309,7 @@
                                             x:Name="PART_Label"
                                             Grid.Row="1"
                                             HorizontalAlignment="Center"
-                                            Foreground="{StaticResource ViewTextColor}"
+                                            Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
                                             Visibility="Collapsed" />
                                     </Grid>
                                 </Grid>

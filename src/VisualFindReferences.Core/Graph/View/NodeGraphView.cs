@@ -41,6 +41,7 @@ namespace VisualFindReferences.Core.Graph.View
         private MouseArea _wheelConstrainedMouseArea;
 
         public bool IsNodeDragging { get; private set; }
+
         public bool AreNodesReallyDragged { get; private set; }
 
         private bool IsDragging;
@@ -208,7 +209,21 @@ namespace VisualFindReferences.Core.Graph.View
         {
             var modelPos = modelSpacePos = ZoomAndPan.MatrixInv.Transform(mousePos);
 
-            return ViewModel?.Model.Nodes.FirstOrDefault(x => ContainsPoint(x, modelPos));
+            var nodes = ViewModel?.Model.Nodes;
+
+            if (nodes != null)
+            {
+                // go through in reverse so we get the one WPF is showing on top
+                for (int i = nodes.Count - 1; i >= 0; i--)
+                {
+                    if (ContainsPoint(nodes[i], modelPos))
+                    {
+                        return nodes[i];
+                    }
+                }
+            }
+
+            return null;
         }
 
         private bool ContainsPoint(Node node, Point mousePos)
