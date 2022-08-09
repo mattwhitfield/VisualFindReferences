@@ -111,12 +111,16 @@ namespace VisualFindReferences.Core.Graph.View
 
         public static readonly DependencyProperty SelectionVisibilityProperty = DependencyProperty.Register("SelectionVisibility", typeof(Visibility), typeof(NodeGraphView), new PropertyMetadata(Visibility.Collapsed));
 
-        public void StartAnimation(IDictionary<Node, Layout.GraphPoint> nodes, double scale, double startX, double startY)
+        public void StartAnimation(IDictionary<Node, GraphPoint>? nodes, double scale, double startX, double startY)
         {
             _animation = new GraphAnimation(ZoomAndPan, scale, startX, startY);
-            foreach (var pair in nodes)
+
+            if (nodes != null)
             {
-                _animation.NodeAnimations.Add(new NodeAnimation(pair.Key, pair.Value.X, pair.Value.Y));
+                foreach (var pair in nodes)
+                {
+                    _animation.NodeAnimations.Add(new NodeAnimation(pair.Key, pair.Value.X, pair.Value.Y));
+                }
             }
 
             _animationStopwatch = Stopwatch.StartNew();

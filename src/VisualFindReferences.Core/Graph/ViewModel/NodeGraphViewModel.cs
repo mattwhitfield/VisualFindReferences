@@ -101,6 +101,17 @@ namespace VisualFindReferences.Core.Graph.ViewModel
             }
         }
 
+        public void FitNodesToView(bool selectedOnly)
+        {
+            if (View != null)
+            {
+                Model.CalculateContentSize(null, selectedOnly, out var rect);
+                var proposedZoomAndPan = View.ZoomAndPan.GetTarget(rect);
+
+                View.StartAnimation(null, proposedZoomAndPan.Scale, proposedZoomAndPan.StartX, proposedZoomAndPan.StartY);
+            }
+        }
+
         private void SetBusyText(string text)
         {
             View?.Dispatcher.Invoke(new Action(() => BusyText = text));

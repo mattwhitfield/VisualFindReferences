@@ -104,5 +104,41 @@
         {
             _package = visualFindReferencesPackage;
         }
+
+        private void ChooseLayoutClick(object sender, RoutedEventArgs e)
+        {
+            var contextMenu = (ContextMenu)FindResource("LayoutContextMenu");
+            contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            contextMenu.PlacementTarget = ChooseLayoutButton;
+            contextMenu.IsOpen = true;
+        }
+
+        private void FitToDisplayClick(object sender, RoutedEventArgs e)
+        {
+            ViewModel.FitNodesToView(false);
+        }
+
+        private void ApplyLayoutClick(object sender, RoutedEventArgs e)
+        {
+            ViewModel.ApplyLayout(true);
+        }
+
+        private void HorizontalGridClick(object sender, RoutedEventArgs e)
+        {
+            ViewModel.LayoutType = Core.Graph.Layout.LayoutAlgorithmType.HorizontalBalancedGrid;
+            ViewModel.ApplyLayout(true);
+        }
+
+        private void VerticalGridClick(object sender, RoutedEventArgs e)
+        {
+            ViewModel.LayoutType = Core.Graph.Layout.LayoutAlgorithmType.VerticalBalancedGrid;
+            ViewModel.ApplyLayout(true);
+        }
+
+        private void ForceDirectedClick(object sender, RoutedEventArgs e)
+        {
+            ViewModel.LayoutType = Core.Graph.Layout.LayoutAlgorithmType.ForceDirected;
+            ViewModel.ApplyLayout(true);
+        }
     }
 }

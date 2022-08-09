@@ -281,12 +281,98 @@
             </Style>
 
             <ContextMenu x:Key="NodeContextMenu" />
+
+            <ContextMenu x:Key="LayoutContextMenu">
+                <MenuItem Click="HorizontalGridClick" Header="Horizontal Grid" />
+                <MenuItem Click="VerticalGridClick" Header="Vertical Grid" />
+                <MenuItem Click="ForceDirectedClick" Header="Force Directed" />
+            </ContextMenu>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <v:NodeGraphView x:Name="GraphView" NodeContextMenuRequested="NodeGraphViewNodeContextMenuRequested" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel
+            Grid.Row="0"
+            Margin="6,0"
+            Orientation="Horizontal">
+            <Button Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
+                <StackPanel Orientation="Horizontal">
+                    <Path
+                        Width="12"
+                        Height="12"
+                        Margin="4,0"
+                        Data="M15,19.88C15.04,20.18 14.94,20.5 14.71,20.71C14.32,21.1 13.69,21.1 13.3,20.71L9.29,16.7C9.06,16.47 8.96,16.16 9,15.87V10.75L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L15,10.75V19.88M7.04,5L11,10.06V15.58L13,17.58V10.05L16.96,5H7.04Z"
+                        Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                        Stretch="Uniform" />
+                    <TextBlock
+                        Margin="0,0,4,0"
+                        Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                        Text="Filter projects" />
+                </StackPanel>
+            </Button>
+            <Button
+                x:Name="ChooseLayoutButton"
+                Margin="6,0"
+                Click="ChooseLayoutClick"
+                Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
+                <StackPanel Orientation="Horizontal">
+                    <Path
+                        Width="12"
+                        Height="12"
+                        Margin="4,0"
+                        Data="M19.5 17C19.37 17 19.24 17 19.11 17.04L17.5 13.79C17.95 13.34 18.25 12.71 18.25 12C18.25 10.62 17.13 9.5 15.75 9.5C15.62 9.5 15.5 9.5 15.36 9.54L13.73 6.29C14.21 5.84 14.5 5.21 14.5 4.5C14.5 3.12 13.38 2 12 2S9.5 3.12 9.5 4.5C9.5 5.21 9.79 5.84 10.26 6.29L8.64 9.54C8.5 9.5 8.38 9.5 8.25 9.5C6.87 9.5 5.75 10.62 5.75 12C5.75 12.71 6.05 13.34 6.5 13.79L4.89 17.04C4.76 17 4.63 17 4.5 17C3.12 17 2 18.12 2 19.5C2 20.88 3.12 22 4.5 22S7 20.88 7 19.5C7 18.8 6.71 18.16 6.24 17.71L7.86 14.46C8 14.5 8.12 14.5 8.25 14.5C8.38 14.5 8.5 14.5 8.64 14.46L10.27 17.71C9.8 18.16 9.5 18.8 9.5 19.5C9.5 20.88 10.62 22 12 22S14.5 20.88 14.5 19.5C14.5 18.12 13.38 17 12 17C11.87 17 11.74 17 11.61 17.04L10 13.79C10.46 13.34 10.75 12.71 10.75 12S10.46 10.66 10 10.21L11.61 6.96C11.74 7 11.87 7 12 7S12.26 7 12.39 6.96L14 10.21C13.55 10.66 13.25 11.3 13.25 12C13.25 13.38 14.37 14.5 15.75 14.5C15.88 14.5 16 14.5 16.14 14.46L17.77 17.71C17.3 18.16 17 18.8 17 19.5C17 20.88 18.12 22 19.5 22S22 20.88 22 19.5C22 18.12 20.88 17 19.5 17Z"
+                        Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                        Stretch="Uniform" />
+                    <TextBlock
+                        Margin="0,0,4,0"
+                        Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                        Text="Set layout" />
+                </StackPanel>
+            </Button>
+            <Button Click="ApplyLayoutClick" Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
+                <StackPanel Orientation="Horizontal">
+                    <Path
+                        Width="12"
+                        Height="12"
+                        Margin="4,0"
+                        Data="M2 12C2 16.97 6.03 21 11 21C13.39 21 15.68 20.06 17.4 18.4L15.9 16.9C14.63 18.25 12.86 19 11 19C4.76 19 1.64 11.46 6.05 7.05C10.46 2.64 18 5.77 18 12H15L19 16H19.1L23 12H20C20 7.03 15.97 3 11 3C6.03 3 2 7.03 2 12Z"
+                        Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                        Stretch="Uniform" />
+                    <TextBlock
+                        Margin="0,0,4,0"
+                        Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                        Text="Apply layout" />
+                </StackPanel>
+            </Button>
+            <Button
+                Margin="6,0"
+                Click="FitToDisplayClick"
+                Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
+                <StackPanel Orientation="Horizontal">
+                    <Path
+                        Width="12"
+                        Height="12"
+                        Margin="4,0"
+                        Data="M3 16C3 18.8 5.2 21 8 21H10V19H8C6.3 19 5 17.7 5 16V14H3V16M21 8C21 5.2 18.8 3 16 3H14V5H16C17.7 5 19 6.3 19 8V10H21V8M16 21C18.8 21 21 18.8 21 16V14H19V16C19 17.7 17.7 19 16 19H14V21H16M8 3C5.2 3 3 5.2 3 8V10H5V8C5 6.3 6.3 5 8 5H10V3H8Z"
+                        Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                        Stretch="Uniform" />
+                    <TextBlock
+                        Margin="0,0,4,0"
+                        Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                        Text="Fit to display" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+        <v:NodeGraphView
+            x:Name="GraphView"
+            Grid.Row="1"
+            NodeContextMenuRequested="NodeGraphViewNodeContextMenuRequested" />
         <Grid
             x:Name="IgnoredPromptPopup"
+            Grid.Row="1"
             HorizontalAlignment="Center"
             VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>
