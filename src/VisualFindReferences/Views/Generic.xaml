@@ -6,6 +6,8 @@
     xmlns:platformUI="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
     xmlns:v="clr-namespace:VisualFindReferences.Core.Graph.View;assembly=VisualFindReferences.Core">
 
+    <BooleanToVisibilityConverter x:Key="VisiConverter" />
+
     <Style x:Key="DefaultConnectorViewStyle" TargetType="{x:Type v:ConnectorView}">
         <Setter Property="Template">
             <Setter.Value>
@@ -75,7 +77,8 @@
                 HorizontalAlignment="Right"
                 FontSize="11"
                 Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
-                Text="Type:" />
+                Text="Type:"
+                Visibility="{Binding ShouldShowTypeName, Converter={StaticResource VisiConverter}}" />
             <TextBlock
                 Grid.Row="3"
                 Grid.Column="1"
@@ -108,7 +111,8 @@
                 HorizontalAlignment="Left"
                 FontSize="11"
                 Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
-                Text="{Binding TypeName, Mode=OneTime}" />
+                Text="{Binding TypeName, Mode=OneTime}"
+                Visibility="{Binding ShouldShowTypeName, Converter={StaticResource VisiConverter}}" />
             <TextBlock
                 Grid.Row="3"
                 Grid.Column="2"
@@ -219,40 +223,163 @@
                             BorderThickness="2"
                             CornerRadius="4"
                             IsHitTestVisible="True">
-                            <Grid Margin="2">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <Path
-                                    Grid.Column="0"
-                                    Width="16"
-                                    Height="16"
-                                    Margin="2"
-                                    Data="{Binding Model.Icon, Mode=OneTime}"
-                                    Fill="{Binding Model.IconColor, Mode=OneTime}"
-                                    Stretch="Uniform" />
-                                <StackPanel
-                                    Grid.Column="1"
-                                    Margin="4,0,0,0"
-                                    Orientation="Vertical">
-                                    <TextBlock
-                                        HorizontalAlignment="Left"
-                                        FontFamily="Segoe UI"
-                                        FontSize="11"
-                                        FontWeight="Bold"
-                                        Foreground="{TemplateBinding Foreground}"
-                                        Text="{Binding Model.ContainerName, Mode=OneTime}"
-                                        TextOptions.TextFormattingMode="Ideal" />
-                                    <TextBlock
-                                        Margin="0,1,0,0"
-                                        HorizontalAlignment="Left"
-                                        FontFamily="Segoe UI"
-                                        FontSize="10"
-                                        Foreground="{TemplateBinding Foreground}"
-                                        Text="{Binding Model.TypeName, Mode=OneTime}"
-                                        TextOptions.TextFormattingMode="Ideal" />
-                                </StackPanel>
+                            <Grid>
+                                <Grid Margin="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Path
+                                        Grid.Column="0"
+                                        Width="16"
+                                        Height="16"
+                                        Margin="2"
+                                        Data="{Binding Model.Icon, Mode=OneTime}"
+                                        Fill="{Binding Model.IconColor, Mode=OneTime}"
+                                        Stretch="Uniform" />
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        Margin="4,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Orientation="Vertical">
+                                        <TextBlock
+                                            HorizontalAlignment="Left"
+                                            FontFamily="Segoe UI"
+                                            FontSize="11"
+                                            FontWeight="Bold"
+                                            Foreground="{TemplateBinding Foreground}"
+                                            Text="{Binding Model.ContainerName, Mode=OneTime}"
+                                            TextOptions.TextFormattingMode="Ideal" />
+                                        <TextBlock
+                                            Margin="0,1,0,0"
+                                            HorizontalAlignment="Left"
+                                            FontFamily="Segoe UI"
+                                            FontSize="10"
+                                            Foreground="{TemplateBinding Foreground}"
+                                            Text="{Binding Model.TypeName, Mode=OneTime}"
+                                            TextOptions.TextFormattingMode="Ideal"
+                                            Visibility="{Binding Model.ShouldShowTypeName, Mode=OneTime, Converter={StaticResource VisiConverter}}" />
+                                    </StackPanel>
+                                    <StackPanel
+                                        Grid.Column="2"
+                                        Margin="0"
+                                        Orientation="Vertical">
+                                        <TextBlock
+                                            FontFamily="Segoe UI"
+                                            FontSize="11"
+                                            FontWeight="Bold"
+                                            Text="" />
+                                        <TextBlock
+                                            FontFamily="Segoe UI"
+                                            FontSize="10"
+                                            Text="" />
+                                    </StackPanel>
+                                </Grid>
+                                <v:IgnoreSize
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    IsHitTestVisible="False">
+                                    <Grid>
+                                        <Grid.RenderTransform>
+                                            <TranslateTransform X="-5" Y="-24" />
+                                        </Grid.RenderTransform>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Path
+                                            Grid.Column="0"
+                                            Width="16"
+                                            Height="16"
+                                            Margin="2"
+                                            Data="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2C6.47,2 2,6.47 2,12C2,17.53 6.47,22 12,22C17.53,22 22,17.53 22,12C22,6.47 17.53,2 12,2M14.59,8L12,10.59L9.41,8L8,9.41L10.59,12L8,14.59L9.41,16L12,13.41L14.59,16L16,14.59L13.41,12L16,9.41L14.59,8Z"
+                                            Fill="#FFA00000"
+                                            Stretch="Uniform" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="2"
+                                            HorizontalAlignment="Center"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                                            Text="No references found"
+                                            TextOptions.TextFormattingMode="Ideal" />
+                                        <Grid.Style>
+                                            <Style TargetType="{x:Type Grid}">
+                                                <Setter Property="Opacity" Value="0" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Model.NoMoreReferences}" Value="True">
+                                                        <DataTrigger.EnterActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+                                                                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0" />
+                                                                        <LinearDoubleKeyFrame KeyTime="0:0:0.33" Value="1" />
+                                                                        <LinearDoubleKeyFrame KeyTime="0:0:0.5" Value="0.9" />
+                                                                        <LinearDoubleKeyFrame KeyTime="0:0:5.5" Value="0.9" />
+                                                                        <LinearDoubleKeyFrame KeyTime="0:0:5.83" Value="0" />
+                                                                    </DoubleAnimationUsingKeyFrames>
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </DataTrigger.EnterActions>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Grid.Style>
+                                    </Grid>
+                                </v:IgnoreSize>
+                                <v:IgnoreSize
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    IsHitTestVisible="False">
+                                    <Grid>
+                                        <Grid.RenderTransform>
+                                            <TranslateTransform X="-5" Y="-24" />
+                                        </Grid.RenderTransform>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Path
+                                            Grid.Column="0"
+                                            Width="16"
+                                            Height="16"
+                                            Margin="2"
+                                            Data="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"
+                                            Fill="Goldenrod"
+                                            Stretch="Uniform" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="2"
+                                            HorizontalAlignment="Center"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                                            Text="New references added"
+                                            TextOptions.TextFormattingMode="Ideal" />
+                                        <Grid.Style>
+                                            <Style TargetType="{x:Type Grid}">
+                                                <Setter Property="Opacity" Value="0" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Model.ReferenceLocationsAdded}" Value="True">
+                                                        <DataTrigger.EnterActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+                                                                        <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0" />
+                                                                        <LinearDoubleKeyFrame KeyTime="0:0:0.33" Value="1" />
+                                                                        <LinearDoubleKeyFrame KeyTime="0:0:0.5" Value="0.9" />
+                                                                        <LinearDoubleKeyFrame KeyTime="0:0:5.5" Value="0.9" />
+                                                                        <LinearDoubleKeyFrame KeyTime="0:0:5.83" Value="0" />
+                                                                    </DoubleAnimationUsingKeyFrames>
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </DataTrigger.EnterActions>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Grid.Style>
+                                    </Grid>
+                                </v:IgnoreSize>
                             </Grid>
                         </Border>
                     </Grid>

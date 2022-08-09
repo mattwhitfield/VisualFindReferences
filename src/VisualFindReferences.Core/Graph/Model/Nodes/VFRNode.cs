@@ -15,6 +15,8 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
             AssemblyName = foundReferences.Symbol.ContainingAssembly.Name;
         }
 
+        public bool ShouldShowTypeName => !string.IsNullOrWhiteSpace(TypeName);
+
         public string NamespaceName { get; }
 
         public string AssemblyName { get; }
@@ -24,6 +26,21 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
         public bool ReferenceSearchAvailable { get; set; }
 
         public FoundReferences NodeFoundReferences { get; }
+
+        private bool _noMoreReferences;
+
+        public bool NoMoreReferences
+        {
+            get { return _noMoreReferences; }
+            set
+            {
+                if (value != _noMoreReferences)
+                {
+                    _noMoreReferences = value;
+                    RaisePropertyChanged(nameof(NoMoreReferences));
+                }
+            }
+        }
 
         private bool _referenceLocationsAdded;
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -8,28 +9,68 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
 {
     public static class NodeFactory
     {
-        private static readonly Dictionary<Type, Func<NodeGraph, FoundReferences, VFRNode>> _factoryMethods = new Dictionary<Type, Func<NodeGraph, FoundReferences, VFRNode>>
+        private static readonly Dictionary<Type, Func<NodeGraph, FoundReferences, SyntaxNode, VFRNode>> _factoryMethods = new Dictionary<Type, Func<NodeGraph, FoundReferences, SyntaxNode, VFRNode>>
         {
-            { typeof(AnonymousFunctionExpressionSyntax), (graph, foundReferences) => new AnonymousFunctionNode(graph, foundReferences) },
-            { typeof(AnonymousMethodExpressionSyntax), (graph, foundReferences) => new AnonymousMethodNode(graph, foundReferences) },
-            { typeof(ParenthesizedLambdaExpressionSyntax), (graph, foundReferences) => new LambdaNode(graph, foundReferences) },
-            { typeof(SimpleLambdaExpressionSyntax), (graph, foundReferences) => new LambdaNode(graph, foundReferences) },
-            { typeof(ConstructorDeclarationSyntax), (graph, foundReferences) => new ConstructorNode(graph, foundReferences) },
-            { typeof(DestructorDeclarationSyntax), (graph, foundReferences) => new DestructorNode(graph, foundReferences) },
-            { typeof(OperatorDeclarationSyntax), (graph, foundReferences) => new OperatorNode(graph, foundReferences) },
-            { typeof(ConversionOperatorDeclarationSyntax), (graph, foundReferences) => new OperatorNode(graph, foundReferences) },
-            { typeof(EventDeclarationSyntax), (graph, foundReferences) => new EventNode(graph, foundReferences) },
-            { typeof(EventFieldDeclarationSyntax), (graph, foundReferences) => new EventNode(graph, foundReferences) },
-            { typeof(PropertyDeclarationSyntax), (graph, foundReferences) => new PropertyNode(graph, foundReferences) },
-            { typeof(IndexerDeclarationSyntax), (graph, foundReferences) => new IndexerNode(graph, foundReferences) },
-            { typeof(LocalFunctionStatementSyntax), (graph, foundReferences) => new LocalMethodNode(graph, foundReferences) },
-            { typeof(MethodDeclarationSyntax), (graph, foundReferences) => new MethodNode(graph, foundReferences) },
-            { typeof(VariableDeclaratorSyntax), (graph, foundReferences) => new FieldInitializerNode(graph, foundReferences) },
-            { typeof(ClassDeclarationSyntax), (graph, foundReferences) => new ClassNode(graph, foundReferences) },
-            { typeof(StructDeclarationSyntax), (graph, foundReferences) => new StructNode(graph, foundReferences) },
-            { typeof(RecordDeclarationSyntax), (graph, foundReferences) => new RecordNode(graph, foundReferences) },
-            { typeof(InterfaceDeclarationSyntax), (graph, foundReferences) => new InterfaceNode(graph, foundReferences) },
+            { typeof(AnonymousFunctionExpressionSyntax), (graph, foundReferences, node) => new AnonymousFunctionNode(graph, foundReferences) },
+            { typeof(AnonymousMethodExpressionSyntax), (graph, foundReferences, node) => new AnonymousMethodNode(graph, foundReferences) },
+            { typeof(ParenthesizedLambdaExpressionSyntax), (graph, foundReferences, node) => new LambdaNode(graph, foundReferences) },
+            { typeof(SimpleLambdaExpressionSyntax), (graph, foundReferences, node) => new LambdaNode(graph, foundReferences) },
+            { typeof(ConstructorDeclarationSyntax), (graph, foundReferences, node) => new ConstructorNode(graph, foundReferences) },
+            { typeof(DestructorDeclarationSyntax), (graph, foundReferences, node) => new DestructorNode(graph, foundReferences) },
+            { typeof(OperatorDeclarationSyntax), (graph, foundReferences, node) => new OperatorNode(graph, foundReferences) },
+            { typeof(ConversionOperatorDeclarationSyntax), (graph, foundReferences, node) => new OperatorNode(graph, foundReferences) },
+            { typeof(EventDeclarationSyntax), (graph, foundReferences, node) => new EventNode(graph, foundReferences) },
+            { typeof(EventFieldDeclarationSyntax), (graph, foundReferences, node) => new EventNode(graph, foundReferences) },
+            { typeof(PropertyDeclarationSyntax), (graph, foundReferences, node) => new PropertyNode(graph, foundReferences) },
+            { typeof(AccessorDeclarationSyntax), (graph, foundReferences, node) => HandleAccessor(node)?.Invoke(graph, foundReferences) ?? new UnknownNode(graph, foundReferences) },
+            { typeof(IndexerDeclarationSyntax), (graph, foundReferences, node) => new IndexerNode(graph, foundReferences) },
+            { typeof(LocalFunctionStatementSyntax), (graph, foundReferences, node) => new LocalMethodNode(graph, foundReferences) },
+            { typeof(MethodDeclarationSyntax), (graph, foundReferences, node) => new MethodNode(graph, foundReferences) },
+            { typeof(VariableDeclaratorSyntax), (graph, foundReferences, node) => new FieldInitializerNode(graph, foundReferences) },
+            { typeof(ClassDeclarationSyntax), (graph, foundReferences, node) => new ClassNode(graph, foundReferences) },
+            { typeof(StructDeclarationSyntax), (graph, foundReferences, node) => new StructNode(graph, foundReferences) },
+            { typeof(RecordDeclarationSyntax), (graph, foundReferences, node) => new RecordNode(graph, foundReferences) },
+            { typeof(InterfaceDeclarationSyntax), (graph, foundReferences, node) => new InterfaceNode(graph, foundReferences) },
         };
+
+        private static Func<NodeGraph, FoundReferences, VFRNode>? HandleAccessor(SyntaxNode node)
+        {
+            var accessor = (AccessorDeclarationSyntax)node;
+            if (accessor.IsKind(SyntaxKind.GetAccessorDeclaration))
+            {
+                foreach (var ancestor in node.Ancestors())
+                {
+                    if (ancestor is PropertyDeclarationSyntax)
+                    {
+                        return (graph, foundReferences) => new PropertyAccessorNode(graph, foundReferences);
+                    }
+                    if (ancestor is IndexerDeclarationSyntax)
+                    {
+                        return (graph, foundReferences) => new IndexerAccessorNode(graph, foundReferences);
+                    }
+                }
+            }
+            else if (accessor.IsKind(SyntaxKind.SetAccessorDeclaration))
+            {
+                foreach (var ancestor in node.Ancestors())
+                {
+                    if (ancestor is PropertyDeclarationSyntax)
+                    {
+                        return (graph, foundReferences) => new PropertyMutatorNode(graph, foundReferences);
+                    }
+                    if (ancestor is IndexerDeclarationSyntax)
+                    {
+                        return (graph, foundReferences) => new IndexerMutatorNode(graph, foundReferences);
+                    }
+                }
+            }
+            else if (accessor.IsKind(SyntaxKind.AddAccessorDeclaration) || accessor.IsKind(SyntaxKind.RemoveAccessorDeclaration))
+            {
+                return (graph, foundReferences) => new EventNode(graph, foundReferences);
+            }
+
+            return null;
+        }
 
         private static readonly Dictionary<Type, Func<SyntaxNode, bool>> _validators = new Dictionary<Type, Func<SyntaxNode, bool>>
         {
@@ -38,6 +79,7 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
             { typeof(AnonymousMethodExpressionSyntax), node => node.Ancestors().Any(x => x is VariableDeclaratorSyntax) },
             { typeof(ParenthesizedLambdaExpressionSyntax), node => node.Ancestors().Any(x => x is VariableDeclaratorSyntax) },
             { typeof(SimpleLambdaExpressionSyntax), node => node.Ancestors().Any(x => x is VariableDeclaratorSyntax) },
+            { typeof(AccessorDeclarationSyntax), node => HandleAccessor(node) != null },
         };
 
         public static bool IsSupportedContainer(SyntaxNode node)
@@ -67,7 +109,7 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
                     }
                 }
 
-                return factory(graph, references);
+                return factory(graph, references, node);
             }
 
             return null;

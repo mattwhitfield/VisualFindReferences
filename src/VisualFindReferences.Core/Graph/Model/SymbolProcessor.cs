@@ -79,7 +79,6 @@ namespace VisualFindReferences.Core.Graph.Model
             }
 
             // reset ReferenceLocationsAdded flags
-            vfrModel.Nodes.OfType<VFRNode>().Each(x => x.ReferenceLocationsAdded = false);
             viewModel.FilteredReferencesMessage = string.Empty;
 
             // if the target doesn't exist, create it
@@ -99,8 +98,11 @@ namespace VisualFindReferences.Core.Graph.Model
                 vfrModel.Nodes.Add(targetNode);
             }
             targetNode.ReferenceSearchAvailable = false;
+            targetNode.NoMoreReferences = false;
 
             var filteredReferenceCount = 0;
+
+            bool anyAdded = false;
 
             if (references.ReferencingSymbols != null)
             {
@@ -126,6 +128,8 @@ namespace VisualFindReferences.Core.Graph.Model
                         continue;
                     }
 
+                    anyAdded = true;
+
                     // either create a new node or add a referencing location to an existing node
                     if (!vfrModel.GetNodeFor(referencingSymbol.Symbol, out var referencingNode))
                     {
@@ -139,6 +143,7 @@ namespace VisualFindReferences.Core.Graph.Model
                     else
                     {
                         referencingLocationsInAllowedProjects.Each(referencingNode.NodeFoundReferences.ReferencingLocations.Add);
+                        referencingNode.ReferenceLocationsAdded = false;
                         referencingNode.ReferenceLocationsAdded = referencingLocationsInAllowedProjects.Count > 0;
                     }
 
@@ -154,9 +159,14 @@ namespace VisualFindReferences.Core.Graph.Model
                 }
             }
 
+            if (!anyAdded)
+            {
+                targetNode.NoMoreReferences = true;
+            }
+
             if (filteredReferenceCount > 0)
             {
-                viewModel.FilteredReferencesMessage = "References filtered: " + filteredReferenceCount;
+                viewModel.FilteredReferencesMessage = anyAdded ? "References filtered: " + filteredReferenceCount : "All references (" + filteredReferenceCount + ") were filtered";
             }
         }
     }
