@@ -97,7 +97,7 @@ namespace VisualFindReferences.Core.Graph.Model
 
                 vfrModel.Nodes.Add(targetNode);
             }
-            targetNode.ReferenceSearchAvailable = false;
+            targetNode.SearchedSymbols.Add(references.Symbol);
             targetNode.NoMoreReferences = false;
 
             var filteredReferenceCount = 0;

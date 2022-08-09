@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
@@ -49,6 +50,19 @@ namespace VisualFindReferences.Views
                         if (parameterList != null && NodeFactory.IsSupportedContainer(parameterList.Parent, out _))
                         {
                             syntaxNode = parameterList.Parent;
+                        }
+                    }
+
+                    if (!NodeFactory.IsSupportedContainer(syntaxNode, out _))
+                    {
+                        var symbol = await SymbolFinder.FindSymbolAtPositionAsync(document, caretPosition);
+                        if (symbol != null)
+                        {
+                            var node = symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+                            if (node != null)
+                            {
+                                syntaxNode = node;
+                            }
                         }
                     }
 

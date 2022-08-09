@@ -6,6 +6,8 @@
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.TextManager.Interop;
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
@@ -27,10 +29,10 @@
         {
             InitializeComponent();
             Model = new VFRNodeGraph();
-            IgnoredPromptPopup.DataContext = GraphView.DataContext = ViewModel = Model.ViewModel;
+            MainDisplay.DataContext = FilteringDisplay.DataContext = ViewModel = Model.ViewModel as VFRNodeGraphViewModel;
         }
 
-        public NodeGraphViewModel ViewModel { get; }
+        public VFRNodeGraphViewModel ViewModel { get; }
 
         public VFRNodeGraph Model { get; }
 
@@ -43,10 +45,11 @@
 
             if (e.Node is VFRNode vfrNode)
             {
-                if (vfrNode.ReferenceSearchAvailable)
+                var searchable = GetSearchableLocations(vfrNode);
+                if (searchable.Any())
                 {
                     contextMenu.Items.Add(new Separator());
-                    foreach (var searchableSymbol in vfrNode.GetSearchableSymbols())
+                    foreach (var searchableSymbol in searchable)
                     {
                         contextMenu.Items.Add(new MenuItem { Header = "Find references to " + searchableSymbol.Name, Command = GetSearchCommand(searchableSymbol) });
                     }
@@ -63,6 +66,26 @@
             }
 
             e.ContextMenu = contextMenu;
+        }
+
+        private static List<SearchableSymbol> GetSearchableLocations(VFRNode vfrNode)
+        {
+            return vfrNode.GetSearchableSymbols().Where(x => x.Targets.Any(t => !vfrNode.SearchedSymbols.Contains(t))).ToList();
+        }
+
+        private ICommand GetGoToLocation(ReferencingLocation referencingLocation)
+        {
+            Action goToLocation = () =>
+            {
+                var cm = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
+                var tm = (IVsTextManager)Package.GetGlobalService(typeof(SVsTextManager));
+                var ws = (Workspace)cm.GetService<VisualStudioWorkspace>();
+                ws.OpenDocument(referencingLocation.Location.Document.Id);
+                tm.GetActiveView(1, null, out var av);
+                var pos = referencingLocation.Location.Location.GetMappedLineSpan();
+                av.SetCaretPos(pos.StartLinePosition.Line, pos.StartLinePosition.Character);
+            };
+            return new RelayCommand(goToLocation);
         }
 
         private ICommand GetSearchCommand(SearchableSymbol searchableSymbol)
@@ -85,24 +108,27 @@
             return new RelayCommand(() => Model.Nodes.Remove(node));
         }
 
-        private ICommand GetGoToLocation(ReferencingLocation referencingLocation)
-        {
-            Action goToLocation = () =>
-            {
-                var cm = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
-                var tm = (IVsTextManager)Package.GetGlobalService(typeof(SVsTextManager));
-                var ws = (Workspace)cm.GetService<VisualStudioWorkspace>();
-                ws.OpenDocument(referencingLocation.Location.Document.Id);
-                tm.GetActiveView(1, null, out var av);
-                var pos = referencingLocation.Location.Location.GetMappedLineSpan();
-                av.SetCaretPos(pos.StartLinePosition.Line, pos.StartLinePosition.Character);
-            };
-            return new RelayCommand(goToLocation);
-        }
-
         internal void SetPackage(VisualFindReferencesPackage visualFindReferencesPackage)
         {
             _package = visualFindReferencesPackage;
+        }
+
+        private void ChooseDoubleClickAction(object sender, RoutedEventArgs e)
+        {
+            var contextMenu = (ContextMenu)FindResource("DoubleClickActionContextMenu");
+            contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            contextMenu.PlacementTarget = ChooseDoubleClickActionButton;
+            contextMenu.IsOpen = true;
+        }
+
+        private void GoToReferencesOnDoubleClick(object sender, RoutedEventArgs e)
+        {
+            ViewModel.DoubleClickAction = DoubleClickAction.GoToCode;
+        }
+
+        private void FindReferencesOnDoubleClick(object sender, RoutedEventArgs e)
+        {
+            ViewModel.DoubleClickAction = DoubleClickAction.FindReferences;
         }
 
         private void ChooseLayoutClick(object sender, RoutedEventArgs e)
@@ -111,6 +137,18 @@
             contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             contextMenu.PlacementTarget = ChooseLayoutButton;
             contextMenu.IsOpen = true;
+        }
+
+        private void OpenFilteringDisplay(object sender, RoutedEventArgs e)
+        {
+            MainDisplay.Visibility = Visibility.Collapsed;
+            FilteringDisplay.Visibility = Visibility.Visible;
+        }
+
+        private void CloseFilteringDisplay(object sender, RoutedEventArgs e)
+        {
+            MainDisplay.Visibility = Visibility.Visible;
+            FilteringDisplay.Visibility = Visibility.Collapsed;
         }
 
         private void FitToDisplayClick(object sender, RoutedEventArgs e)
@@ -139,6 +177,30 @@
         {
             ViewModel.LayoutType = Core.Graph.Layout.LayoutAlgorithmType.ForceDirected;
             ViewModel.ApplyLayout(true);
+        }
+
+        private void NodeDoubleClicked(object sender, NodeEventArgs e)
+        {
+            if (e.Node is VFRNode vfrNode)
+            {
+                switch (ViewModel.DoubleClickAction)
+                {
+                    case DoubleClickAction.FindReferences:
+                        var searchable = GetSearchableLocations(vfrNode).FirstOrDefault();
+                        if (searchable != null)
+                        {
+                            GetSearchCommand(searchable).Execute(vfrNode);
+                        }
+                        break;
+                    case DoubleClickAction.GoToCode:
+                        var location = vfrNode.NodeFoundReferences.ReferencingLocations.FirstOrDefault();
+                        if (location != null)
+                        {
+                            GetGoToLocation(location).Execute(vfrNode);
+                        }
+                        break;
+                }
+            }
         }
     }
 }

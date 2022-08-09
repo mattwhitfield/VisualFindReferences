@@ -4,9 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:model="clr-namespace:VisualFindReferences.Core.Graph.Model;assembly=VisualFindReferences.Core"
     xmlns:platformUI="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
     xmlns:v="clr-namespace:VisualFindReferences.Core.Graph.View;assembly=VisualFindReferences.Core"
+    xmlns:viewmodel="clr-namespace:VisualFindReferences.Core.Graph.ViewModel;assembly=VisualFindReferences.Core"
     xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+    d:DataContext="{d:DesignInstance Type=viewmodel:VFRNodeGraphViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -287,134 +290,254 @@
                 <MenuItem Click="VerticalGridClick" Header="Vertical Grid" />
                 <MenuItem Click="ForceDirectedClick" Header="Force Directed" />
             </ContextMenu>
+
+            <ContextMenu x:Key="DoubleClickActionContextMenu">
+                <MenuItem Click="GoToReferencesOnDoubleClick" Header="Go To Code" />
+                <MenuItem Click="FindReferencesOnDoubleClick" Header="Find References" />
+            </ContextMenu>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <StackPanel
-            Grid.Row="0"
-            Margin="6,0"
-            Orientation="Horizontal">
-            <Button Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
-                <StackPanel Orientation="Horizontal">
-                    <Path
-                        Width="12"
-                        Height="12"
-                        Margin="4,0"
-                        Data="M15,19.88C15.04,20.18 14.94,20.5 14.71,20.71C14.32,21.1 13.69,21.1 13.3,20.71L9.29,16.7C9.06,16.47 8.96,16.16 9,15.87V10.75L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L15,10.75V19.88M7.04,5L11,10.06V15.58L13,17.58V10.05L16.96,5H7.04Z"
-                        Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
-                        Stretch="Uniform" />
-                    <TextBlock
-                        Margin="0,0,4,0"
-                        Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
-                        Text="Filter projects" />
-                </StackPanel>
-            </Button>
-            <Button
-                x:Name="ChooseLayoutButton"
+        <Grid x:Name="MainDisplay">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <StackPanel
+                Grid.Row="0"
                 Margin="6,0"
-                Click="ChooseLayoutClick"
-                Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
-                <StackPanel Orientation="Horizontal">
-                    <Path
-                        Width="12"
-                        Height="12"
-                        Margin="4,0"
-                        Data="M19.5 17C19.37 17 19.24 17 19.11 17.04L17.5 13.79C17.95 13.34 18.25 12.71 18.25 12C18.25 10.62 17.13 9.5 15.75 9.5C15.62 9.5 15.5 9.5 15.36 9.54L13.73 6.29C14.21 5.84 14.5 5.21 14.5 4.5C14.5 3.12 13.38 2 12 2S9.5 3.12 9.5 4.5C9.5 5.21 9.79 5.84 10.26 6.29L8.64 9.54C8.5 9.5 8.38 9.5 8.25 9.5C6.87 9.5 5.75 10.62 5.75 12C5.75 12.71 6.05 13.34 6.5 13.79L4.89 17.04C4.76 17 4.63 17 4.5 17C3.12 17 2 18.12 2 19.5C2 20.88 3.12 22 4.5 22S7 20.88 7 19.5C7 18.8 6.71 18.16 6.24 17.71L7.86 14.46C8 14.5 8.12 14.5 8.25 14.5C8.38 14.5 8.5 14.5 8.64 14.46L10.27 17.71C9.8 18.16 9.5 18.8 9.5 19.5C9.5 20.88 10.62 22 12 22S14.5 20.88 14.5 19.5C14.5 18.12 13.38 17 12 17C11.87 17 11.74 17 11.61 17.04L10 13.79C10.46 13.34 10.75 12.71 10.75 12S10.46 10.66 10 10.21L11.61 6.96C11.74 7 11.87 7 12 7S12.26 7 12.39 6.96L14 10.21C13.55 10.66 13.25 11.3 13.25 12C13.25 13.38 14.37 14.5 15.75 14.5C15.88 14.5 16 14.5 16.14 14.46L17.77 17.71C17.3 18.16 17 18.8 17 19.5C17 20.88 18.12 22 19.5 22S22 20.88 22 19.5C22 18.12 20.88 17 19.5 17Z"
-                        Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
-                        Stretch="Uniform" />
-                    <TextBlock
-                        Margin="0,0,4,0"
-                        Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
-                        Text="Set layout" />
-                </StackPanel>
-            </Button>
-            <Button Click="ApplyLayoutClick" Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
-                <StackPanel Orientation="Horizontal">
-                    <Path
-                        Width="12"
-                        Height="12"
-                        Margin="4,0"
-                        Data="M2 12C2 16.97 6.03 21 11 21C13.39 21 15.68 20.06 17.4 18.4L15.9 16.9C14.63 18.25 12.86 19 11 19C4.76 19 1.64 11.46 6.05 7.05C10.46 2.64 18 5.77 18 12H15L19 16H19.1L23 12H20C20 7.03 15.97 3 11 3C6.03 3 2 7.03 2 12Z"
-                        Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
-                        Stretch="Uniform" />
-                    <TextBlock
-                        Margin="0,0,4,0"
-                        Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
-                        Text="Apply layout" />
-                </StackPanel>
-            </Button>
-            <Button
-                Margin="6,0"
-                Click="FitToDisplayClick"
-                Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
-                <StackPanel Orientation="Horizontal">
-                    <Path
-                        Width="12"
-                        Height="12"
-                        Margin="4,0"
-                        Data="M3 16C3 18.8 5.2 21 8 21H10V19H8C6.3 19 5 17.7 5 16V14H3V16M21 8C21 5.2 18.8 3 16 3H14V5H16C17.7 5 19 6.3 19 8V10H21V8M16 21C18.8 21 21 18.8 21 16V14H19V16C19 17.7 17.7 19 16 19H14V21H16M8 3C5.2 3 3 5.2 3 8V10H5V8C5 6.3 6.3 5 8 5H10V3H8Z"
-                        Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
-                        Stretch="Uniform" />
-                    <TextBlock
-                        Margin="0,0,4,0"
-                        Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
-                        Text="Fit to display" />
-                </StackPanel>
-            </Button>
-        </StackPanel>
-        <v:NodeGraphView
-            x:Name="GraphView"
-            Grid.Row="1"
-            NodeContextMenuRequested="NodeGraphViewNodeContextMenuRequested" />
-        <Grid
-            x:Name="IgnoredPromptPopup"
-            Grid.Row="1"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Bottom">
+                Orientation="Horizontal">
+                <Button Click="OpenFilteringDisplay" Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path
+                            Width="12"
+                            Height="12"
+                            Margin="4,0"
+                            Data="M15,19.88C15.04,20.18 14.94,20.5 14.71,20.71C14.32,21.1 13.69,21.1 13.3,20.71L9.29,16.7C9.06,16.47 8.96,16.16 9,15.87V10.75L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L15,10.75V19.88M7.04,5L11,10.06V15.58L13,17.58V10.05L16.96,5H7.04Z"
+                            Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                            Stretch="Uniform" />
+                        <TextBlock
+                            Margin="0,0,4,0"
+                            Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                            Text="Filter projects" />
+                    </StackPanel>
+                </Button>
+                <Button
+                    x:Name="ChooseLayoutButton"
+                    Margin="6,0"
+                    Click="ChooseLayoutClick"
+                    Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path
+                            Width="12"
+                            Height="12"
+                            Margin="4,0"
+                            Data="M19.5 17C19.37 17 19.24 17 19.11 17.04L17.5 13.79C17.95 13.34 18.25 12.71 18.25 12C18.25 10.62 17.13 9.5 15.75 9.5C15.62 9.5 15.5 9.5 15.36 9.54L13.73 6.29C14.21 5.84 14.5 5.21 14.5 4.5C14.5 3.12 13.38 2 12 2S9.5 3.12 9.5 4.5C9.5 5.21 9.79 5.84 10.26 6.29L8.64 9.54C8.5 9.5 8.38 9.5 8.25 9.5C6.87 9.5 5.75 10.62 5.75 12C5.75 12.71 6.05 13.34 6.5 13.79L4.89 17.04C4.76 17 4.63 17 4.5 17C3.12 17 2 18.12 2 19.5C2 20.88 3.12 22 4.5 22S7 20.88 7 19.5C7 18.8 6.71 18.16 6.24 17.71L7.86 14.46C8 14.5 8.12 14.5 8.25 14.5C8.38 14.5 8.5 14.5 8.64 14.46L10.27 17.71C9.8 18.16 9.5 18.8 9.5 19.5C9.5 20.88 10.62 22 12 22S14.5 20.88 14.5 19.5C14.5 18.12 13.38 17 12 17C11.87 17 11.74 17 11.61 17.04L10 13.79C10.46 13.34 10.75 12.71 10.75 12S10.46 10.66 10 10.21L11.61 6.96C11.74 7 11.87 7 12 7S12.26 7 12.39 6.96L14 10.21C13.55 10.66 13.25 11.3 13.25 12C13.25 13.38 14.37 14.5 15.75 14.5C15.88 14.5 16 14.5 16.14 14.46L17.77 17.71C17.3 18.16 17 18.8 17 19.5C17 20.88 18.12 22 19.5 22S22 20.88 22 19.5C22 18.12 20.88 17 19.5 17Z"
+                            Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                            Stretch="Uniform" />
+                        <TextBlock
+                            Margin="0,0,4,0"
+                            Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                            Text="Set layout" />
+                    </StackPanel>
+                </Button>
+                <Button Click="ApplyLayoutClick" Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path
+                            Width="12"
+                            Height="12"
+                            Margin="4,0"
+                            Data="M2 12C2 16.97 6.03 21 11 21C13.39 21 15.68 20.06 17.4 18.4L15.9 16.9C14.63 18.25 12.86 19 11 19C4.76 19 1.64 11.46 6.05 7.05C10.46 2.64 18 5.77 18 12H15L19 16H19.1L23 12H20C20 7.03 15.97 3 11 3C6.03 3 2 7.03 2 12Z"
+                            Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                            Stretch="Uniform" />
+                        <TextBlock
+                            Margin="0,0,4,0"
+                            Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                            Text="Apply layout" />
+                    </StackPanel>
+                </Button>
+                <Button
+                    Margin="6,0"
+                    Click="FitToDisplayClick"
+                    Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path
+                            Width="12"
+                            Height="12"
+                            Margin="4,0"
+                            Data="M3 16C3 18.8 5.2 21 8 21H10V19H8C6.3 19 5 17.7 5 16V14H3V16M21 8C21 5.2 18.8 3 16 3H14V5H16C17.7 5 19 6.3 19 8V10H21V8M16 21C18.8 21 21 18.8 21 16V14H19V16C19 17.7 17.7 19 16 19H14V21H16M8 3C5.2 3 3 5.2 3 8V10H5V8C5 6.3 6.3 5 8 5H10V3H8Z"
+                            Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                            Stretch="Uniform" />
+                        <TextBlock
+                            Margin="0,0,4,0"
+                            Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                            Text="Fit to display" />
+                    </StackPanel>
+                </Button>
+                <Button
+                    x:Name="ChooseDoubleClickActionButton"
+                    Margin="0,0,6,0"
+                    Click="ChooseDoubleClickAction"
+                    Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path
+                            Width="12"
+                            Height="12"
+                            Margin="4,0"
+                            Data="M13 5C15.21 5 17 6.79 17 9C17 10.5 16.2 11.77 15 12.46V11.24C15.61 10.69 16 9.89 16 9C16 7.34 14.66 6 13 6S10 7.34 10 9C10 9.89 10.39 10.69 11 11.24V12.46C9.8 11.77 9 10.5 9 9C9 6.79 10.79 5 13 5M20 20.5C19.97 21.32 19.32 21.97 18.5 22H13C12.62 22 12.26 21.85 12 21.57L8 17.37L8.74 16.6C8.93 16.39 9.2 16.28 9.5 16.28H9.7L12 18V9C12 8.45 12.45 8 13 8S14 8.45 14 9V13.47L15.21 13.6L19.15 15.79C19.68 16.03 20 16.56 20 17.14V20.5M20 2H4C2.9 2 2 2.9 2 4V12C2 13.11 2.9 14 4 14H8V12L4 12L4 4H20L20 12H18V14H20V13.96L20.04 14C21.13 14 22 13.09 22 12V4C22 2.9 21.11 2 20 2Z"
+                            Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                            Stretch="Uniform" />
+                        <TextBlock
+                            Margin="0,0,4,0"
+                            Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                            Text="Double click action" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            <v:NodeGraphView
+                x:Name="GraphView"
+                Grid.Row="1"
+                NodeContextMenuRequested="NodeGraphViewNodeContextMenuRequested"
+                NodeDoubleClicked="NodeDoubleClicked" />
+            <Grid
+                x:Name="IgnoredPromptPopup"
+                Grid.Row="1"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Path
+                    Grid.Column="0"
+                    Width="16"
+                    Height="16"
+                    Margin="2"
+                    Data="M15,19.88C15.04,20.18 14.94,20.5 14.71,20.71C14.32,21.1 13.69,21.1 13.3,20.71L9.29,16.7C9.06,16.47 8.96,16.16 9,15.87V10.75L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L15,10.75V19.88M7.04,5L11,10.06V15.58L13,17.58V10.05L16.96,5H7.04Z"
+                    Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                    Stretch="Uniform" />
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="2"
+                    HorizontalAlignment="Center"
+                    Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                    Text="{Binding FilteredReferencesMessage}" />
+                <Grid.Style>
+                    <Style TargetType="{x:Type Grid}">
+                        <Setter Property="Opacity" Value="0" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ShowFilteredReferencesPrompt}" Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0" />
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.33" Value="1" />
+                                                <LinearDoubleKeyFrame KeyTime="0:0:0.5" Value="0.9" />
+                                                <LinearDoubleKeyFrame KeyTime="0:0:5.5" Value="0.9" />
+                                                <LinearDoubleKeyFrame KeyTime="0:0:5.83" Value="0" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+            </Grid>
+        </Grid>
+        <Grid x:Name="FilteringDisplay" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Path
-                Grid.Column="0"
-                Width="16"
-                Height="16"
-                Margin="2"
-                Data="M15,19.88C15.04,20.18 14.94,20.5 14.71,20.71C14.32,21.1 13.69,21.1 13.3,20.71L9.29,16.7C9.06,16.47 8.96,16.16 9,15.87V10.75L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L15,10.75V19.88M7.04,5L11,10.06V15.58L13,17.58V10.05L16.96,5H7.04Z"
-                Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
-                Stretch="Uniform" />
+            <StackPanel
+                Grid.Row="0"
+                Grid.ColumnSpan="2"
+                Margin="6,0"
+                Orientation="Horizontal">
+                <Button Click="CloseFilteringDisplay" Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path
+                            Width="12"
+                            Height="12"
+                            Margin="4,0"
+                            Data="M15,19.88C15.04,20.18 14.94,20.5 14.71,20.71C14.32,21.1 13.69,21.1 13.3,20.71L9.29,16.7C9.06,16.47 8.96,16.16 9,15.87V10.75L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L15,10.75V19.88M7.04,5L11,10.06V15.58L13,17.58V10.05L16.96,5H7.04Z"
+                            Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                            Stretch="Uniform" />
+                        <TextBlock
+                            Margin="0,0,4,0"
+                            Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ButtonTextBrushKey}}"
+                            Text="Apply" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
             <TextBlock
-                Grid.Column="1"
-                Margin="2"
-                HorizontalAlignment="Center"
+                Grid.Row="1"
+                Grid.Column="0"
+                Margin="6,6,4,6"
                 Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
-                Text="{Binding FilteredReferencesMessage}" />
-            <Grid.Style>
-                <Style TargetType="{x:Type Grid}">
-                    <Setter Property="Opacity" Value="0" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding ShowFilteredReferencesPrompt}" Value="True">
-                            <DataTrigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity">
-                                            <LinearDoubleKeyFrame KeyTime="0:0:0" Value="0" />
-                                            <LinearDoubleKeyFrame KeyTime="0:0:0.33" Value="1" />
-                                            <LinearDoubleKeyFrame KeyTime="0:0:0.5" Value="0.9" />
-                                            <LinearDoubleKeyFrame KeyTime="0:0:5.5" Value="0.9" />
-                                            <LinearDoubleKeyFrame KeyTime="0:0:5.83" Value="0" />
-                                        </DoubleAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </DataTrigger.EnterActions>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
+                Text="Projects to exclude:" />
+            <TextBox
+                Grid.Row="1"
+                Grid.Column="1"
+                Margin="9,6,6,6"
+                HorizontalAlignment="Stretch"
+                Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ThemedDialogTextBoxStyleKey}}"
+                Text="{Binding ProjectFilterMatchPattern, UpdateSourceTrigger=PropertyChanged, Delay=350}" />
+            <ScrollViewer
+                Grid.Row="2"
+                Grid.ColumnSpan="2"
+                Margin="6"
+                HorizontalAlignment="Stretch"
+                Grid.IsSharedSizeScope="True"
+                HorizontalScrollBarVisibility="Disabled"
+                Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ScrollViewerStyleKey}}">
+                <ItemsControl ItemsSource="{Binding Projects}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type model:ProjectModel}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Path
+                                    Grid.Column="0"
+                                    Width="20"
+                                    Height="20"
+                                    Margin="2"
+                                    Data="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3M11 8H9V10C9 11.1 8.1 12 7 12C8.1 12 9 12.9 9 14V16H11V18H9C7.9 18 7 17.1 7 16V15C7 13.9 6.1 13 5 13V11C6.1 11 7 10.1 7 9V8C7 6.9 7.9 6 9 6H11V8M19 13C17.9 13 17 13.9 17 15V16C17 17.1 16.1 18 15 18H13V16H15V14C15 12.9 15.9 12 17 12C15.9 12 15 11.1 15 10V8H13V6H15C16.1 6 17 6.9 17 8V9C17 10.1 17.9 11 19 11V13Z"
+                                    Fill="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                                    Stretch="Uniform" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="2"
+                                    HorizontalAlignment="Center"
+                                    FontSize="14"
+                                    Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                                    Text="{Binding ProjectName}" />
+                                <Grid.Style>
+                                    <Style TargetType="{x:Type Grid}">
+                                        <Setter Property="Opacity" Value="1" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsIncludedInSearches}" Value="False">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Opacity" Value="0.5" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </UserControl>

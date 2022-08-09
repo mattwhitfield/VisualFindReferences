@@ -21,7 +21,9 @@ namespace VisualFindReferences.Core.Graph.View
 
         protected override Geometry GetLayoutClip(Size layoutSlotSize)
         {
+#pragma warning disable CS8603 // Possible null reference return - deliberate - we don't want clipping, and the base library nullability is declared incorrectly
             return null;
+#pragma warning restore CS8603 // Possible null reference return.
         }
     }
 }

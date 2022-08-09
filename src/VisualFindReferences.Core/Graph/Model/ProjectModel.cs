@@ -1,14 +1,19 @@
-﻿namespace VisualFindReferences.Core.Graph.Model
+﻿using System;
+
+namespace VisualFindReferences.Core.Graph.Model
 {
     public class ProjectModel : ModelBase
     {
-        public ProjectModel(string projectName, bool isIncludedInSearches)
+        public ProjectModel(string projectName, bool isIncludedInSearches, Guid projectId)
         {
             ProjectName = projectName;
             _isIncludedInSearches = isIncludedInSearches;
+            ProjectId = projectId;
         }
 
         public string ProjectName { get; }
+
+        public Guid ProjectId { get; } 
 
         private bool _isIncludedInSearches;
 

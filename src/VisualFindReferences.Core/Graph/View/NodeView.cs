@@ -81,6 +81,17 @@ namespace VisualFindReferences.Core.Graph.View
             return view != null;
         }
 
+        protected override void OnMouseDoubleClick(MouseButtonEventArgs e)
+        {
+            base.OnMouseDoubleClick(e);
+
+            var node = ViewModel?.Model;
+            if (node != null)
+            {
+                node.Owner.ViewModel?.View?.HandleDoubleClick(node);
+            }
+        }
+
         protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonUp(e);

@@ -71,6 +71,8 @@ namespace VisualFindReferences.Core.Graph.View
 
         public event EventHandler<ContextMenuEventArgs>? NodeContextMenuRequested;
 
+        public event EventHandler<NodeEventArgs>? NodeDoubleClicked;
+
         public double SelectionWidth
         {
             get { return (double)GetValue(SelectionWidthProperty); }
@@ -87,6 +89,11 @@ namespace VisualFindReferences.Core.Graph.View
         {
             get { return (double)GetValue(SelectionStartYProperty); }
             set { SetValue(SelectionStartYProperty, value); }
+        }
+
+        internal void HandleDoubleClick(Node node)
+        {
+            NodeDoubleClicked?.Invoke(this, new NodeEventArgs(node));
         }
 
         public double SelectionStartX

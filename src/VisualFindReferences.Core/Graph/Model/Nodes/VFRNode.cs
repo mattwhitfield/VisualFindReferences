@@ -10,7 +10,6 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
         protected VFRNode(NodeGraph flowChart, FoundReferences foundReferences, Geometry icon, Brush iconColor) : base(flowChart, GetContainerName(foundReferences), GetTypeName(foundReferences), 0, 0, icon, iconColor)
         {
             NodeFoundReferences = foundReferences;
-            ReferenceSearchAvailable = foundReferences.IsSource;
             NamespaceName = foundReferences.Symbol.ContainingNamespace.ToDisplayString();
             AssemblyName = foundReferences.Symbol.ContainingAssembly.Name;
         }
@@ -23,9 +22,9 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
 
         public abstract string NodeSymbolType { get; }
 
-        public bool ReferenceSearchAvailable { get; set; }
-
         public FoundReferences NodeFoundReferences { get; }
+
+        public List<ISymbol> SearchedSymbols { get; } = new List<ISymbol>();
 
         private bool _noMoreReferences;
 
