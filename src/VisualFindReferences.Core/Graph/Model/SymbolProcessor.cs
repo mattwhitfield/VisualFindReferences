@@ -44,9 +44,9 @@ namespace VisualFindReferences.Core.Graph.Model
 
                             while (current != null)
                             {
-                                if (NodeFactory.IsSupportedContainer(current))
+                                if (NodeFactory.IsSupportedContainer(current, out var actualNode))
                                 {
-                                    var containerSymbol = semanticModel.GetDeclaredSymbol(current);
+                                    var containerSymbol = semanticModel.GetDeclaredSymbol(actualNode);
                                     if (containerSymbol != null)
                                     {
                                         if (!outputDictionary.TryGetValue(containerSymbol, out var referencingSymbol))

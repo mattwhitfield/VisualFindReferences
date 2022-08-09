@@ -15,7 +15,7 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
 
         public override IEnumerable<SearchableSymbol> GetSearchableSymbols()
         {
-            var variableDeclarator = NodeFoundReferences.SyntaxNode.Ancestors().OfType<VariableDeclaratorSyntax>().First();
+            var variableDeclarator = NodeFoundReferences.SyntaxNode.AncestorsAndSelf().OfType<VariableDeclaratorSyntax>().First();
             var targetSymbol = NodeFoundReferences.SemanticModel.GetDeclaredSymbol(variableDeclarator);
             if (targetSymbol != null)
             {

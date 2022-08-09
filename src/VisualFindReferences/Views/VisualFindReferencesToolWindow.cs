@@ -43,21 +43,21 @@ namespace VisualFindReferences.Views
 
                 if (syntaxNode != null)
                 {
-                    if (!NodeFactory.IsSupportedContainer(syntaxNode))
+                    if (!NodeFactory.IsSupportedContainer(syntaxNode, out _))
                     {
                         var parameterList = syntaxNode.AncestorsAndSelf().OfType<ParameterListSyntax>().FirstOrDefault();
-                        if (parameterList != null && NodeFactory.IsSupportedContainer(parameterList.Parent))
+                        if (parameterList != null && NodeFactory.IsSupportedContainer(parameterList.Parent, out _))
                         {
                             syntaxNode = parameterList.Parent;
                         }
                     }
 
-                    if (NodeFactory.IsSupportedContainer(syntaxNode))
+                    if (NodeFactory.IsSupportedContainer(syntaxNode, out var actualNode))
                     {
-                        var declaredSymbol = semanticModel.GetDeclaredSymbol(syntaxNode);
+                        var declaredSymbol = semanticModel.GetDeclaredSymbol(actualNode);
                         if (declaredSymbol != null)
                         {
-                            var searchingSymbol = new SyntaxNodeWithSymbol(declaredSymbol, syntaxNode, semanticModel);
+                            var searchingSymbol = new SyntaxNodeWithSymbol(declaredSymbol, actualNode, semanticModel);
                             return await SymbolProcessor.FindReferencesAsync(updateText, searchingSymbol, declaredSymbol, document.Project.Solution);
                         }
                         else

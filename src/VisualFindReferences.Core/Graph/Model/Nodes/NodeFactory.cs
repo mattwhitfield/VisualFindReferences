@@ -82,10 +82,24 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
             { typeof(AccessorDeclarationSyntax), node => HandleAccessor(node) != null },
         };
 
-        public static bool IsSupportedContainer(SyntaxNode node)
+        private static readonly Dictionary<Type, Func<SyntaxNode, SyntaxNode>> _targetTransforms = new Dictionary<Type, Func<SyntaxNode, SyntaxNode>>
         {
+            { typeof(AnonymousFunctionExpressionSyntax), node => node.Ancestors().First(x => x is VariableDeclaratorSyntax) },
+            { typeof(AnonymousMethodExpressionSyntax), node => node.Ancestors().First(x => x is VariableDeclaratorSyntax) },
+            { typeof(ParenthesizedLambdaExpressionSyntax), node => node.Ancestors().First(x => x is VariableDeclaratorSyntax) },
+            { typeof(SimpleLambdaExpressionSyntax), node => node.Ancestors().First(x => x is VariableDeclaratorSyntax) },
+        };
+
+        public static bool IsSupportedContainer(SyntaxNode node, out SyntaxNode actualTarget)
+        {
+            actualTarget = node;
             if (_factoryMethods.ContainsKey(node.GetType()))
             {
+                if (_targetTransforms.TryGetValue(node.GetType(), out var nodeTransform))
+                {
+                    actualTarget = nodeTransform(node);
+                }
+
                 if (_validators.TryGetValue(node.GetType(), out var validator))
                 {
                     return validator(node);
