@@ -13,12 +13,12 @@ namespace VisualFindReferences.Core.Graph.Model
 {
     public class SymbolProcessor
     {
-        public static Task<FoundReferences> FindReferencesAsync(Action<string> updateText, SyntaxNodeWithSymbol searchingNode, ISymbol targetSymbol, Solution solution)
+        public static Task<FoundReferences> FindReferencesAsync(Action<string> updateText, SyntaxNodeWithSymbol searchingNode, ISymbol targetSymbol, Document document)
         {
-            return FindReferencesAsync(updateText, searchingNode, new[] { targetSymbol }, solution);
+            return FindReferencesAsync(updateText, searchingNode, new[] { targetSymbol }, document.Project.Solution, document);
         }
 
-        public static async Task<FoundReferences> FindReferencesAsync(Action<string> updateText, SyntaxNodeWithSymbol searchingNode, IEnumerable<ISymbol> targetSymbols, Solution solution)
+        public static async Task<FoundReferences> FindReferencesAsync(Action<string> updateText, SyntaxNodeWithSymbol searchingNode, IEnumerable<ISymbol> targetSymbols, Solution solution, Document document)
         {
             var outputDictionary = new Dictionary<ISymbol, ReferencingSymbol>(SymbolEqualityComparer.Default);
 
@@ -67,7 +67,7 @@ namespace VisualFindReferences.Core.Graph.Model
                 }
             }
 
-            return new FoundReferences(searchingNode.Symbol, searchingNode.SyntaxNode, searchingNode.SemanticModel, solution, outputDictionary.Values.ToList());
+            return new FoundReferences(searchingNode.Symbol, searchingNode.SyntaxNode, searchingNode.SemanticModel, solution, outputDictionary.Values.ToList(), document);
         }
 
         public static void ProcessFoundReferences(FoundReferences references, NodeGraph model)
@@ -102,6 +102,7 @@ namespace VisualFindReferences.Core.Graph.Model
                     targetNode.IsRoot = true;
                 }
 
+                targetNode.SourceDocument = references.SourceDocument;
                 vfrModel.Nodes.Add(targetNode);
             }
             targetNode.SearchedSymbols.Add(references.Symbol);

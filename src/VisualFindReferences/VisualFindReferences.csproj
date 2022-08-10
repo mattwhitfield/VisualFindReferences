@@ -71,6 +71,7 @@
     <Compile Include="Commands\FindReferencesForSymbolCommand.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Helper\Attempt.cs" />
+    <Compile Include="Helper\GoTo.cs" />
     <Compile Include="Helper\TextViewHelper.cs" />
     <Compile Include="Helper\VsMessageBox.cs" />
     <Compile Include="IVisualFindReferencesPackage.cs" />

@@ -72,7 +72,7 @@ namespace VisualFindReferences.Views
                         if (declaredSymbol != null)
                         {
                             var searchingSymbol = new SyntaxNodeWithSymbol(declaredSymbol, actualNode, semanticModel);
-                            return await SymbolProcessor.FindReferencesAsync(updateText, searchingSymbol, declaredSymbol, document.Project.Solution);
+                            return await SymbolProcessor.FindReferencesAsync(updateText, searchingSymbol, declaredSymbol, document);
                         }
                         else
                         {

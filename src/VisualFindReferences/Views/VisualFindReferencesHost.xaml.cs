@@ -18,6 +18,7 @@
     using VisualFindReferences.Core.Graph.Model.Nodes;
     using VisualFindReferences.Core.Graph.View;
     using VisualFindReferences.Core.Graph.ViewModel;
+    using VisualFindReferences.Helper;
 
     /// <summary>
     /// Interaction logic for VisualFindReferencesHost.xaml
@@ -64,6 +65,24 @@
                         contextMenu.Items.Add(new MenuItem { Header = "Go to " + referencingLocation.LinePrompt, Command = GetGoToLocation(referencingLocation) });
                     }
                 }
+                else if (vfrNode.SourceDocument != null)
+                {
+                    var location = vfrNode.NodeFoundReferences.SyntaxNode.GetLocation();
+                    if (location != null)
+                    {
+                        var document = vfrNode.SourceDocument.Name;
+                        if (string.IsNullOrWhiteSpace(document))
+                        {
+                            document = "Unknown file";
+                        }
+
+                        var lineIndex = location.GetMappedLineSpan().StartLinePosition.Line + 1;
+
+                        contextMenu.Items.Add(new Separator());
+                        contextMenu.Items.Add(new MenuItem { Header = "Go to " + document + ", Line: " + (lineIndex), Command = GetGoToLocation(location, vfrNode.SourceDocument) });
+                    }
+                }
+
             }
 
             e.ContextMenu = contextMenu;
@@ -74,17 +93,20 @@
             return vfrNode.GetSearchableSymbols().Where(x => x.Targets.Any(t => !vfrNode.SearchedSymbols.Contains(t))).ToList();
         }
 
-        private ICommand GetGoToLocation(ReferencingLocation referencingLocation)
+        private ICommand GetGoToLocation(ReferencingLocation location)
         {
             Action goToLocation = () =>
             {
-                var cm = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
-                var tm = (IVsTextManager)Package.GetGlobalService(typeof(SVsTextManager));
-                var ws = (Workspace)cm.GetService<VisualStudioWorkspace>();
-                ws.OpenDocument(referencingLocation.Location.Document.Id);
-                tm.GetActiveView(1, null, out var av);
-                var pos = referencingLocation.Location.Location.GetMappedLineSpan();
-                av.SetCaretPos(pos.StartLinePosition.Line, pos.StartLinePosition.Character);
+                GoTo.Location(location.Location.Location, location.Location.Document);
+            };
+            return new RelayCommand(goToLocation);
+        }
+
+        private ICommand GetGoToLocation(Location location, Document document)
+        {
+            Action goToLocation = () =>
+            {
+                GoTo.Location(location, document);
             };
             return new RelayCommand(goToLocation);
         }
@@ -93,7 +115,7 @@
         {
             Task<FoundReferences> FindReferencesForSearchableSymbolAsync(Action<string> updateText, NodeGraphViewModel viewModel)
             {
-                return SymbolProcessor.FindReferencesAsync(updateText, searchableSymbol.SearchingSymbol, searchableSymbol.Targets, searchableSymbol.Solution);
+                return SymbolProcessor.FindReferencesAsync(updateText, searchableSymbol.SearchingSymbol, searchableSymbol.Targets, searchableSymbol.Solution, null);
             }
 
             Action search = () =>

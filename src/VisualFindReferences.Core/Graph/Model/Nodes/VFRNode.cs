@@ -24,6 +24,9 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
 
         public FoundReferences NodeFoundReferences { get; }
 
+        // only set for the root node
+        public Document? SourceDocument { get; set; }
+
         public List<ISymbol> SearchedSymbols { get; } = new List<ISymbol>();
 
         private bool _noMoreReferences;

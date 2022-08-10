@@ -6,10 +6,11 @@ namespace VisualFindReferences.Core.Graph.Model
 
     public class FoundReferences : SyntaxNodeWithSymbol
     {
-        public FoundReferences(ISymbol symbol, SyntaxNode syntaxNode, SemanticModel semanticModel, Solution solution, IList<ReferencingSymbol> referencingSymbols)
+        public FoundReferences(ISymbol symbol, SyntaxNode syntaxNode, SemanticModel semanticModel, Solution solution, IList<ReferencingSymbol> referencingSymbols, Document? sourceDocument)
             : base(symbol, syntaxNode, semanticModel)
         {
             ReferencingSymbols = referencingSymbols;
+            SourceDocument = sourceDocument;
             ReferencingLocations = new List<ReferencingLocation>();
             IsTarget = true;
             Solution = solution;
@@ -28,6 +29,8 @@ namespace VisualFindReferences.Core.Graph.Model
         public bool IsTarget { get; }
 
         public IList<ReferencingSymbol> ReferencingSymbols { get; }
+
+        public Document? SourceDocument { get; }
 
         public IList<ReferencingLocation> ReferencingLocations { get; }
 
