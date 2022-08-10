@@ -110,13 +110,18 @@ namespace VisualFindReferences.Core.Graph.Model
 
         public IDictionary<Node, GraphPoint> GetLayoutPositions(LayoutAlgorithmType algorithmType)
         {
-            var dictionary = new Dictionary<Node, GraphPoint>();
+            var nodesToLayout = new Dictionary<Node, GraphPoint>();
             foreach (var node in Nodes)
             {
-                dictionary[node] = new GraphPoint(node.X, node.Y);
+                nodesToLayout[node] = new GraphPoint(node.X, node.Y);
             }
 
-            var algo = LayoutAlgorithmFactory.Create(algorithmType, this, dictionary);
+            return GetLayoutPositions(algorithmType, nodesToLayout);
+        }
+
+        public IDictionary<Node, GraphPoint> GetLayoutPositions(LayoutAlgorithmType algorithmType, Dictionary<Node, GraphPoint> nodesToLayout)
+        {
+            var algo = LayoutAlgorithmFactory.Create(algorithmType, this, nodesToLayout);
             algo.Layout();
 
             return algo.VerticesPositions;

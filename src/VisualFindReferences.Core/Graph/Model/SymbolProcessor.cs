@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VisualFindReferences.Core.Graph.Helper;
+using VisualFindReferences.Core.Graph.Layout;
 using VisualFindReferences.Core.Graph.Model.Nodes;
 using VisualFindReferences.Core.Graph.ViewModel;
 
@@ -81,6 +82,10 @@ namespace VisualFindReferences.Core.Graph.Model
             // reset ReferenceLocationsAdded flags
             viewModel.FilteredReferencesMessage = string.Empty;
 
+            List<Node> nodesToLayOut = new List<Node>();
+
+            var isInitialLayout = model.Nodes.Count == 0;
+
             // if the target doesn't exist, create it
             if (!vfrModel.GetNodeFor(references.Symbol, out var targetNode))
             {
@@ -89,6 +94,8 @@ namespace VisualFindReferences.Core.Graph.Model
                 {
                     return;
                 }
+
+                nodesToLayOut.Add(targetNode);
 
                 if (vfrModel.Nodes.Count == 0)
                 {
@@ -137,7 +144,11 @@ namespace VisualFindReferences.Core.Graph.Model
                         referencingNode = NodeFactory.Create(referencingSymbol.SyntaxNode, vfrModel, referencingNodeReferences);
                         if (referencingNode != null)
                         {
+                            referencingNode.X = targetNode.X;
+                            referencingNode.Y = targetNode.Y;
                             vfrModel.Nodes.Add(referencingNode);
+
+                            nodesToLayOut.Add(referencingNode);
                         }
                     }
                     else
@@ -167,6 +178,31 @@ namespace VisualFindReferences.Core.Graph.Model
             if (filteredReferenceCount > 0)
             {
                 viewModel.FilteredReferencesMessage = anyAdded ? "References filtered: " + filteredReferenceCount : "All references (" + filteredReferenceCount + ") were filtered";
+            }
+
+            if (viewModel.View != null)
+            {
+                viewModel.View.Dispatcher.BeginInvoke(new Action(() => {
+                    viewModel.View.UpdateLayout();
+
+                    var nodesForAlgorithm = new Dictionary<Node, GraphPoint>();
+                    foreach (var node in nodesToLayOut)
+                    {
+                        nodesForAlgorithm[node] = new GraphPoint(node.X, node.Y);
+                    }
+
+                    var positions = vfrModel.GetLayoutPositions(viewModel.LayoutType, nodesForAlgorithm);
+
+                    var proposedZoomAndPan = viewModel.View.ZoomAndPan;
+
+                    if (isInitialLayout)
+                    {
+                        vfrModel.CalculateContentSize(positions, false, out var rect);
+                        proposedZoomAndPan = viewModel.View.ZoomAndPan.GetTarget(rect);
+                    }
+
+                    viewModel.View.StartAnimation(positions, proposedZoomAndPan.Scale, proposedZoomAndPan.StartX, proposedZoomAndPan.StartY);
+                }));
             }
         }
     }

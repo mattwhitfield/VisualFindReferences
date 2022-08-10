@@ -80,7 +80,7 @@ namespace VisualFindReferences.Core.Graph.Layout
                     force += delta;
                 }
 
-                forces[v] = force;
+                forces[v] = GrandmaProtection(force);
             }
 
             foreach (Connector edge in VisitedGraph.Connectors)
@@ -93,8 +93,9 @@ namespace VisualFindReferences.Core.Graph.Layout
                 double length = Math.Max(delta.Length, double.Epsilon);
                 delta = delta / length * Math.Pow(length, 2) / _constantOfAttraction;
 
-                forces[source] -= delta;
-                forces[target] += delta;
+                var safeDelta = GrandmaProtection(delta);
+                forces[source] -= safeDelta;
+                forces[target] += safeDelta;
             }
 
             foreach (Node vertex in VisitedGraph.Nodes)
@@ -115,6 +116,19 @@ namespace VisualFindReferences.Core.Graph.Layout
                     VerticesPositions[vertex] = position;
                 }
             }
+        }
+
+        private GraphVector GrandmaProtection(GraphVector input)
+        {
+            var xIsYourNan = double.IsNaN(input.X);
+            var yIsYourNan = double.IsNaN(input.Y);
+
+            if (xIsYourNan || yIsYourNan)
+            {
+                input = new GraphVector(xIsYourNan ? 0 : input.X, yIsYourNan ? 0 : input.Y);
+            }
+
+            return input;
         }
     }
 }
