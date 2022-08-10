@@ -111,41 +111,56 @@ namespace VisualFindReferences.TestHarness
 
             NodeGraphViewModel.LayoutType = LayoutAlgorithmType.VerticalBalancedGrid;
 
-            bool includeBack = true;
 
             var node1 = CreateNode(nodeGraph, 1);
-            node1.IsRoot = true;
-
             var node2 = CreateNode(nodeGraph, 2);
             var node3 = CreateNode(nodeGraph, 3);
             var node4 = CreateNode(nodeGraph, 4);
             var node5 = CreateNode(nodeGraph, 5);
-            var node6 = CreateNode(nodeGraph, 6);
-            var node7 = CreateNode(nodeGraph, 7);
-            var node8 = CreateNode(nodeGraph, 8);
-            var node9 = CreateNode(nodeGraph, 9);
-            var node10 = CreateNode(nodeGraph, 10);
+            node1.IsRoot = true;
 
-            node6.ViewModel.IsHighlighted = true;
-
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node1));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node3, node1));
+            nodeGraph.Connectors.Add(new Connector(nodeGraph, node4, node1));
             nodeGraph.Connectors.Add(new Connector(nodeGraph, node5, node1));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node7, node1));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node4, node7));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node6, node7));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node3, node6));
             nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node5));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node3, node2));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node8, node5));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node9, node2));
-            nodeGraph.Connectors.Add(new Connector(nodeGraph, node10, node2));
 
-            if (includeBack)
-            {
-                var node11 = CreateNode(nodeGraph, 11);
-                var node12 = CreateNode(nodeGraph, 12);
-                nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node11));
-                nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node12));
-            }
+
+            //bool includeBack = true;
+
+            //var node1 = CreateNode(nodeGraph, 1);
+            //node1.IsRoot = true;
+
+            //var node2 = CreateNode(nodeGraph, 2);
+            //var node3 = CreateNode(nodeGraph, 3);
+            //var node4 = CreateNode(nodeGraph, 4);
+            //var node5 = CreateNode(nodeGraph, 5);
+            //var node6 = CreateNode(nodeGraph, 6);
+            //var node7 = CreateNode(nodeGraph, 7);
+            //var node8 = CreateNode(nodeGraph, 8);
+            //var node9 = CreateNode(nodeGraph, 9);
+            //var node10 = CreateNode(nodeGraph, 10);
+
+            //node6.ViewModel.IsHighlighted = true;
+
+            //nodeGraph.Connectors.Add(new Connector(nodeGraph, node5, node1));
+            //nodeGraph.Connectors.Add(new Connector(nodeGraph, node7, node1));
+            //nodeGraph.Connectors.Add(new Connector(nodeGraph, node4, node7));
+            //nodeGraph.Connectors.Add(new Connector(nodeGraph, node6, node7));
+            //nodeGraph.Connectors.Add(new Connector(nodeGraph, node3, node6));
+            //nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node5));
+            //nodeGraph.Connectors.Add(new Connector(nodeGraph, node3, node2));
+            //nodeGraph.Connectors.Add(new Connector(nodeGraph, node8, node5));
+            //nodeGraph.Connectors.Add(new Connector(nodeGraph, node9, node2));
+            //nodeGraph.Connectors.Add(new Connector(nodeGraph, node10, node2));
+
+            //if (includeBack)
+            //{
+            //    var node11 = CreateNode(nodeGraph, 11);
+            //    var node12 = CreateNode(nodeGraph, 12);
+            //    nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node11));
+            //    nodeGraph.Connectors.Add(new Connector(nodeGraph, node2, node12));
+            //}
 
         }
 

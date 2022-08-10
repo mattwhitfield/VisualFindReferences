@@ -37,7 +37,6 @@ namespace VisualFindReferences.Core.Graph.Layout
                         if (!laidOutNodes.Contains(connector.EndNode))
                         {
                             leftNodes.Add(connector.EndNode);
-                            //rightNodes.Add(connector.EndNode);
                         }
                     }
                     if (connector.EndNode == currentNode)
@@ -45,7 +44,6 @@ namespace VisualFindReferences.Core.Graph.Layout
                         if (!laidOutNodes.Contains(connector.StartNode))
                         {
                             rightNodes.Add(connector.StartNode);
-                            //leftNodes.Add(connector.StartNode);
                         }
                     }
                 }
@@ -235,6 +233,7 @@ namespace VisualFindReferences.Core.Graph.Layout
 
                     var prevGroup = GetOutputGroup(groupNum - direction);
                     Func<Node, List<Connector>> getLinks = node => GetNodeLinksFrom(node, groupNum - direction, laidOutNodes).ToList();
+                    Func<Node, List<Connector>> getSameLinks = node => GetNodeLinksFrom(node, groupNum, laidOutNodes).ToList();
 
                     List<Tuple<float, float>> GetYCoordinates()
                     {
@@ -251,6 +250,7 @@ namespace VisualFindReferences.Core.Graph.Layout
                     foreach (var node in group)
                     {
                         var leftLinks = getLinks(node);
+                        var sameLinks = getSameLinks(node);
                         var isConnectedToPreviousGroup = leftLinks.Any();
 
                         // skip this node if it's not connected to the left and we're on a foward pass
@@ -281,7 +281,6 @@ namespace VisualFindReferences.Core.Graph.Layout
 
                             // work out the number of crossings that there would be at each index, considering links from the previous group only
                             // put it in the place with least crossings
-
                             var minCrossings = int.MaxValue;
                             var targetIndex = 0;
                             for (var i = 0; i <= coordinates.Count + 1; i++)
@@ -291,12 +290,22 @@ namespace VisualFindReferences.Core.Graph.Layout
                                 {
                                     GetProposedCoordinates(prevGroup, i - 0.5f, proposedCoordinates, link);
                                 }
+
+                                var proposedSameGroupCoordinates = new List<Tuple<float, float>>();
+                                foreach (var link in sameLinks)
+                                {
+                                    GetProposedCoordinates(outputGroup, i - 1, proposedSameGroupCoordinates, link);
+                                }
+
                                 var indexCrossings = GetCrossings(coordinates, proposedCoordinates);
 
-                                if (indexCrossings < minCrossings)
+                                // for any links within the same group, it would be a crossing if it isn't linked to the index next to it
+                                var sameGroupIndexCrossings = proposedSameGroupCoordinates.Count(x => Math.Abs(x.Item1 - x.Item2) > 1);
+                                
+                                if (indexCrossings + sameGroupIndexCrossings < minCrossings)
                                 {
                                     targetIndex = i;
-                                    minCrossings = indexCrossings;
+                                    minCrossings = indexCrossings + sameGroupIndexCrossings;
                                 }
                             }
 
