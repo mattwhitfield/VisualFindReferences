@@ -66,7 +66,10 @@ namespace VisualFindReferences.Core.Graph.Layout
 
             var rightQueue = new Queue<Tuple<Node, int>>();
             var leftQueue = new Queue<Tuple<Node, int>>();
-            rightQueue.Enqueue(Tuple.Create(VisitedGraph.Nodes[0], 0));
+            if (VisitedGraph.Nodes.Count > 0)
+            {
+                rightQueue.Enqueue(Tuple.Create(VisitedGraph.Nodes[0], 0));
+            }
 
             int pass = 1;
             while (leftQueue.Count > 0 || rightQueue.Count > 0)

@@ -13,6 +13,7 @@
     using System.Windows.Controls;
     using System.Windows.Input;
     using VisualFindReferences.Core.Graph.Helper;
+    using VisualFindReferences.Core.Graph.Layout;
     using VisualFindReferences.Core.Graph.Model;
     using VisualFindReferences.Core.Graph.Model.Nodes;
     using VisualFindReferences.Core.Graph.View;
@@ -110,7 +111,37 @@
 
         internal void SetPackage(VisualFindReferencesPackage visualFindReferencesPackage)
         {
+            var packageWasNull = _package == null;
             _package = visualFindReferencesPackage;
+            if (packageWasNull)
+            {
+                var options = _package.Options;
+                ViewModel.DoubleClickAction = options.DefaultDoubleClickAction;
+                ViewModel.ProjectFilterMatchPattern = options.DefaultProjectFilter;
+                ViewModel.LayoutType = options.DefaultLayoutAlgorithmType;
+                SetMenuChecks();
+            }
+        }
+
+        private void SetMenuChecks()
+        {
+            var doubleClickMenu = (ContextMenu)FindResource("DoubleClickActionContextMenu");
+            SetMenuCheck(doubleClickMenu, "GoToCodeMenuItem", ViewModel.DoubleClickAction == DoubleClickAction.GoToCode);
+            SetMenuCheck(doubleClickMenu, "FindReferencesMenuItem", ViewModel.DoubleClickAction == DoubleClickAction.FindReferences);
+
+            var layoutMenu = (ContextMenu)FindResource("LayoutContextMenu");
+            SetMenuCheck(layoutMenu, "HorizontalGridMenuItem", ViewModel.LayoutType == LayoutAlgorithmType.HorizontalBalancedGrid);
+            SetMenuCheck(layoutMenu, "VerticalGridMenuItem", ViewModel.LayoutType == LayoutAlgorithmType.VerticalBalancedGrid);
+            SetMenuCheck(layoutMenu, "ForceDirectedMenuItem", ViewModel.LayoutType == LayoutAlgorithmType.ForceDirected);
+        }
+
+        private void SetMenuCheck(ContextMenu menu, string name, bool value)
+        {
+            var item = menu.Items.OfType<MenuItem>().FirstOrDefault(x => x.Name == name);
+            if (item != null)
+            {
+                item.IsChecked = value;
+            }
         }
 
         private void ChooseDoubleClickAction(object sender, RoutedEventArgs e)
@@ -124,11 +155,13 @@
         private void GoToReferencesOnDoubleClick(object sender, RoutedEventArgs e)
         {
             ViewModel.DoubleClickAction = DoubleClickAction.GoToCode;
+            SetMenuChecks();
         }
 
         private void FindReferencesOnDoubleClick(object sender, RoutedEventArgs e)
         {
             ViewModel.DoubleClickAction = DoubleClickAction.FindReferences;
+            SetMenuChecks();
         }
 
         private void ChooseLayoutClick(object sender, RoutedEventArgs e)
@@ -163,20 +196,23 @@
 
         private void HorizontalGridClick(object sender, RoutedEventArgs e)
         {
-            ViewModel.LayoutType = Core.Graph.Layout.LayoutAlgorithmType.HorizontalBalancedGrid;
+            ViewModel.LayoutType = LayoutAlgorithmType.HorizontalBalancedGrid;
             ViewModel.ApplyLayout(true);
+            SetMenuChecks();
         }
 
         private void VerticalGridClick(object sender, RoutedEventArgs e)
         {
-            ViewModel.LayoutType = Core.Graph.Layout.LayoutAlgorithmType.VerticalBalancedGrid;
+            ViewModel.LayoutType = LayoutAlgorithmType.VerticalBalancedGrid;
             ViewModel.ApplyLayout(true);
+            SetMenuChecks();
         }
 
         private void ForceDirectedClick(object sender, RoutedEventArgs e)
         {
-            ViewModel.LayoutType = Core.Graph.Layout.LayoutAlgorithmType.ForceDirected;
+            ViewModel.LayoutType = LayoutAlgorithmType.ForceDirected;
             ViewModel.ApplyLayout(true);
+            SetMenuChecks();
         }
 
         private void NodeDoubleClicked(object sender, NodeEventArgs e)

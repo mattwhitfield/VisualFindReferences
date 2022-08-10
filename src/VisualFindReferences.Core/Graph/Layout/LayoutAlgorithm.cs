@@ -22,6 +22,11 @@ namespace VisualFindReferences.Core.Graph.Layout
 
         public void Layout()
         {
+            if (VisitedGraph.Nodes.Count == 0)
+            {
+                return;
+            }
+
             Initialize();
             InternalCompute();
 

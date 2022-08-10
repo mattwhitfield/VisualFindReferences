@@ -5,11 +5,11 @@
     using System.Threading;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.ComponentModelHost;
-    using Microsoft.VisualStudio.LanguageServices;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
     using VisualFindReferences.Commands;
     using VisualFindReferences.Core.Graph.View;
+    using VisualFindReferences.Options;
     using VisualFindReferences.Views;
     using Task = System.Threading.Tasks.Task;
 
@@ -18,10 +18,11 @@
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
     [Guid(Constants.ExtensionGuid)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    [ProvideOptionPage(typeof(GeneralOptions), "Visual Find References", "General Options", 0, 0, true)]
     [ProvideToolWindow(typeof(VisualFindReferencesToolWindow))]
     public sealed class VisualFindReferencesPackage : AsyncPackage, IVisualFindReferencesPackage
     {
-        public VisualStudioWorkspace Workspace { get; private set; }
+        public GeneralOptions Options => (GeneralOptions)GetDialogPage(typeof(GeneralOptions));
 
         public IVisualFindReferencesToolWindow ShowToolWindow()
         {
@@ -66,8 +67,6 @@
             {
                 throw new InvalidOperationException();
             }
-
-            Workspace = componentModel.GetService<VisualStudioWorkspace>();
 
             await FindReferencesForSymbolCommand.InitializeAsync(this).ConfigureAwait(true);
         }

@@ -74,6 +74,9 @@
     <Compile Include="Helper\TextViewHelper.cs" />
     <Compile Include="Helper\VsMessageBox.cs" />
     <Compile Include="IVisualFindReferencesPackage.cs" />
+    <Compile Include="Options\GeneralOptions.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualFindReferencesPackage.cs" />
     <Compile Include="Views\IVisualFindReferencesToolWindow.cs" />

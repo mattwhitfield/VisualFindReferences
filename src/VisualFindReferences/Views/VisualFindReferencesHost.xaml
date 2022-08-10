@@ -286,14 +286,14 @@
             <ContextMenu x:Key="NodeContextMenu" />
 
             <ContextMenu x:Key="LayoutContextMenu">
-                <MenuItem Click="HorizontalGridClick" Header="Horizontal Grid" />
-                <MenuItem Click="VerticalGridClick" Header="Vertical Grid" />
-                <MenuItem Click="ForceDirectedClick" Header="Force Directed" />
+                <MenuItem Name="HorizontalGridMenuItem" Click="HorizontalGridClick" Header="Horizontal Grid" IsCheckable="True" />
+                <MenuItem Name="VerticalGridMenuItem" Click="VerticalGridClick" Header="Vertical Grid" IsCheckable="True" />
+                <MenuItem Name="ForceDirectedMenuItem" Click="ForceDirectedClick" Header="Force Directed" IsCheckable="True" />
             </ContextMenu>
 
             <ContextMenu x:Key="DoubleClickActionContextMenu">
-                <MenuItem Click="GoToReferencesOnDoubleClick" Header="Go To Code" />
-                <MenuItem Click="FindReferencesOnDoubleClick" Header="Find References" />
+                <MenuItem Name="GoToCodeMenuItem" Click="GoToReferencesOnDoubleClick" Header="Go To Code" IsCheckable="True" />
+                <MenuItem Name="FindReferencesMenuItem" Click="FindReferencesOnDoubleClick" Header="Find References" IsCheckable="True" />
             </ContextMenu>
         </ResourceDictionary>
     </UserControl.Resources>
