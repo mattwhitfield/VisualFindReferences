@@ -94,9 +94,12 @@ namespace VisualFindReferences.Core.Graph.Model
             {
                 foreach (var connector in list)
                 {
-                    stack.Push(connector.ViewModel);
-                    TraverseFrom(connector.EndNode, targetNode, stack);
-                    stack.Pop();
+                    if (!stack.Any(x => x == connector.ViewModel))
+                    {
+                        stack.Push(connector.ViewModel);
+                        TraverseFrom(connector.EndNode, targetNode, stack);
+                        stack.Pop();
+                    }
                 }
             }
 
