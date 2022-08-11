@@ -256,6 +256,14 @@
                         {
                             GetGoToLocation(location).Execute(vfrNode);
                         }
+                        else if (vfrNode.SourceDocument != null)
+                        {
+                            var sourceLocation = vfrNode.NodeFoundReferences.SyntaxNode.GetLocation();
+                            if (sourceLocation != null)
+                            {
+                                GetGoToLocation(sourceLocation, vfrNode.SourceDocument).Execute(vfrNode);
+                            }
+                        }
                         break;
                 }
             }

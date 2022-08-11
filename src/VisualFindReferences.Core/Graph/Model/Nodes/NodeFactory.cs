@@ -84,10 +84,10 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
 
         private static readonly Dictionary<Type, Func<SyntaxNode, SyntaxNode>> _targetTransforms = new Dictionary<Type, Func<SyntaxNode, SyntaxNode>>
         {
-            { typeof(AnonymousFunctionExpressionSyntax), node => node.Ancestors().First(x => x is VariableDeclaratorSyntax) },
-            { typeof(AnonymousMethodExpressionSyntax), node => node.Ancestors().First(x => x is VariableDeclaratorSyntax) },
-            { typeof(ParenthesizedLambdaExpressionSyntax), node => node.Ancestors().First(x => x is VariableDeclaratorSyntax) },
-            { typeof(SimpleLambdaExpressionSyntax), node => node.Ancestors().First(x => x is VariableDeclaratorSyntax) },
+            { typeof(AnonymousFunctionExpressionSyntax), node => node.Ancestors().FirstOrDefault(x => x is VariableDeclaratorSyntax) ?? node },
+            { typeof(AnonymousMethodExpressionSyntax), node => node.Ancestors().FirstOrDefault(x => x is VariableDeclaratorSyntax) ?? node },
+            { typeof(ParenthesizedLambdaExpressionSyntax), node => node.Ancestors().FirstOrDefault(x => x is VariableDeclaratorSyntax) ?? node },
+            { typeof(SimpleLambdaExpressionSyntax), node => node.Ancestors().FirstOrDefault(x => x is VariableDeclaratorSyntax) ?? node },
         };
 
         public static bool IsSupportedContainer(SyntaxNode node, out SyntaxNode actualTarget)

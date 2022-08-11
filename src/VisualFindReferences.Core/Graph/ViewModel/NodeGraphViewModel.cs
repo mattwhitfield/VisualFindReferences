@@ -74,7 +74,7 @@ namespace VisualFindReferences.Core.Graph.ViewModel
                     View?.Dispatcher.Invoke(new Action(() =>
                     {
                         IsBusy = false;
-                        MessageBox.Show("Error occurred while executing operation: " + e.Message, "Error occurred", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Error occurred while executing operation: " + e.Message + Environment.NewLine + e.StackTrace, "Error occurred", MessageBoxButton.OK, MessageBoxImage.Error);
                     }));
                 }
             });

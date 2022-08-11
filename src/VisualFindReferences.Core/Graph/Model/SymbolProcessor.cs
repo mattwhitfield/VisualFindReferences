@@ -33,41 +33,56 @@ namespace VisualFindReferences.Core.Graph.Model
                     // for each referencing location
                     foreach (var location in item.Locations)
                     {
-                        // get the text, syntax node and semantic model
-                        var text = await location.Document.GetTextAsync();
-                        var syntaxNode = await location.Document.GetSyntaxRootAsync().ConfigureAwait(true);
-                        var semanticModel = await location.Document.GetSemanticModelAsync().ConfigureAwait(true);
-
-                        if (syntaxNode != null && semanticModel != null)
-                        {
-                            // now walk up the syntax tree until we find a node that NodeFactory supports
-                            var current = syntaxNode.FindToken(location.Location.SourceSpan.Start).Parent;
-
-                            while (current != null)
-                            {
-                                if (NodeFactory.IsSupportedContainer(current, out var actualNode))
-                                {
-                                    var containerSymbol = semanticModel.GetDeclaredSymbol(actualNode);
-                                    if (containerSymbol != null)
-                                    {
-                                        if (!outputDictionary.TryGetValue(containerSymbol, out var referencingSymbol))
-                                        {
-                                            outputDictionary[containerSymbol] = referencingSymbol = new ReferencingSymbol(containerSymbol, current, semanticModel, new List<ReferencingLocation>());
-                                        }
-
-                                        referencingSymbol.ReferencingLocations.Add(new ReferencingLocation(location, text));
-                                    }
-                                    break;
-                                }
-
-                                current = current.Parent;
-                            }
-                        }
+                        await ProcessLocation(outputDictionary, location);
                     }
                 }
             }
 
             return new FoundReferences(searchingNode.Symbol, searchingNode.SyntaxNode, searchingNode.SemanticModel, solution, outputDictionary.Values.ToList(), document);
+        }
+
+        private static async Task ProcessLocation(Dictionary<ISymbol, ReferencingSymbol> outputDictionary, ReferenceLocation location)
+        {
+            // get the text, syntax node and semantic model
+            var text = await location.Document.GetTextAsync();
+            var syntaxNode = await location.Document.GetSyntaxRootAsync().ConfigureAwait(true);
+            var semanticModel = await location.Document.GetSemanticModelAsync().ConfigureAwait(true);
+
+            if (syntaxNode != null && semanticModel != null)
+            {
+                WalkTree(outputDictionary, location, text, syntaxNode, semanticModel);
+            }
+        }
+
+        private static void WalkTree(Dictionary<ISymbol, ReferencingSymbol> outputDictionary, ReferenceLocation location, Microsoft.CodeAnalysis.Text.SourceText text, SyntaxNode syntaxNode, SemanticModel semanticModel)
+        {
+            // now walk up the syntax tree until we find a node that NodeFactory supports
+            var current = syntaxNode.FindToken(location.Location.SourceSpan.Start).Parent;
+
+            while (current != null)
+            {
+                if (NodeFactory.IsSupportedContainer(current, out var actualNode))
+                {
+                    AddNode(outputDictionary, location, text, semanticModel, current, actualNode);
+                    break;
+                }
+
+                current = current.Parent;
+            }
+        }
+
+        private static void AddNode(Dictionary<ISymbol, ReferencingSymbol> outputDictionary, ReferenceLocation location, Microsoft.CodeAnalysis.Text.SourceText text, SemanticModel semanticModel, SyntaxNode current, SyntaxNode actualNode)
+        {
+            var containerSymbol = semanticModel.GetDeclaredSymbol(actualNode);
+            if (containerSymbol != null)
+            {
+                if (!outputDictionary.TryGetValue(containerSymbol, out var referencingSymbol))
+                {
+                    outputDictionary[containerSymbol] = referencingSymbol = new ReferencingSymbol(containerSymbol, current, semanticModel, new List<ReferencingLocation>());
+                }
+
+                referencingSymbol.ReferencingLocations.Add(new ReferencingLocation(location, text));
+            }
         }
 
         public static void ProcessFoundReferences(FoundReferences references, NodeGraph model)
@@ -112,6 +127,23 @@ namespace VisualFindReferences.Core.Graph.Model
 
             bool anyAdded = false;
 
+            HandleReferencingSymbols(references, vfrModel, viewModel, nodesToLayOut, targetNode, ref filteredReferenceCount, ref anyAdded);
+
+            if (!anyAdded)
+            {
+                targetNode.NoMoreReferences = true;
+            }
+
+            if (filteredReferenceCount > 0)
+            {
+                viewModel.FilteredReferencesMessage = anyAdded ? "References filtered: " + filteredReferenceCount : "All references (" + filteredReferenceCount + ") were filtered";
+            }
+
+            AnimateAdditions(vfrModel, viewModel, nodesToLayOut, isInitialLayout);
+        }
+
+        private static void HandleReferencingSymbols(FoundReferences references, VFRNodeGraph vfrModel, VFRNodeGraphViewModel viewModel, List<Node> nodesToLayOut, VFRNode targetNode, ref int filteredReferenceCount, ref bool anyAdded)
+        {
             if (references.ReferencingSymbols != null)
             {
                 Func<Project, bool> projectIsIncluded = viewModel.GetProjectFilter();
@@ -138,26 +170,7 @@ namespace VisualFindReferences.Core.Graph.Model
 
                     anyAdded = true;
 
-                    // either create a new node or add a referencing location to an existing node
-                    if (!vfrModel.GetNodeFor(referencingSymbol.Symbol, out var referencingNode))
-                    {
-                        var referencingNodeReferences = new FoundReferences(referencingSymbol.Symbol, referencingSymbol.SyntaxNode, referencingSymbol.SemanticModel, references.Solution, referencingLocationsInAllowedProjects);
-                        referencingNode = NodeFactory.Create(referencingSymbol.SyntaxNode, vfrModel, referencingNodeReferences);
-                        if (referencingNode != null)
-                        {
-                            referencingNode.X = targetNode.X;
-                            referencingNode.Y = targetNode.Y;
-                            vfrModel.Nodes.Add(referencingNode);
-
-                            nodesToLayOut.Add(referencingNode);
-                        }
-                    }
-                    else
-                    {
-                        referencingLocationsInAllowedProjects.Each(referencingNode.NodeFoundReferences.ReferencingLocations.Add);
-                        referencingNode.ReferenceLocationsAdded = false;
-                        referencingNode.ReferenceLocationsAdded = referencingLocationsInAllowedProjects.Count > 0;
-                    }
+                    VFRNode? referencingNode = CreateReferencingNode(references, vfrModel, nodesToLayOut, targetNode, referencingSymbol, referencingLocationsInAllowedProjects);
 
                     // create the link, avoiding duplicates
                     if (referencingNode != null)
@@ -170,20 +183,40 @@ namespace VisualFindReferences.Core.Graph.Model
                     }
                 }
             }
+        }
 
-            if (!anyAdded)
+        private static VFRNode? CreateReferencingNode(FoundReferences references, VFRNodeGraph vfrModel, List<Node> nodesToLayOut, VFRNode targetNode, ReferencingSymbol referencingSymbol, List<ReferencingLocation> referencingLocationsInAllowedProjects)
+        {
+            // either create a new node or add a referencing location to an existing node
+            if (!vfrModel.GetNodeFor(referencingSymbol.Symbol, out var referencingNode))
             {
-                targetNode.NoMoreReferences = true;
+                var referencingNodeReferences = new FoundReferences(referencingSymbol.Symbol, referencingSymbol.SyntaxNode, referencingSymbol.SemanticModel, references.Solution, referencingLocationsInAllowedProjects);
+                referencingNode = NodeFactory.Create(referencingSymbol.SyntaxNode, vfrModel, referencingNodeReferences);
+                if (referencingNode != null)
+                {
+                    referencingNode.X = targetNode.X;
+                    referencingNode.Y = targetNode.Y;
+                    vfrModel.Nodes.Add(referencingNode);
+
+                    nodesToLayOut.Add(referencingNode);
+                }
+            }
+            else
+            {
+                referencingLocationsInAllowedProjects.Each(referencingNode.NodeFoundReferences.ReferencingLocations.Add);
+                referencingNode.ReferenceLocationsAdded = false;
+                referencingNode.ReferenceLocationsAdded = referencingLocationsInAllowedProjects.Count > 0;
             }
 
-            if (filteredReferenceCount > 0)
-            {
-                viewModel.FilteredReferencesMessage = anyAdded ? "References filtered: " + filteredReferenceCount : "All references (" + filteredReferenceCount + ") were filtered";
-            }
+            return referencingNode;
+        }
 
+        private static void AnimateAdditions(VFRNodeGraph vfrModel, VFRNodeGraphViewModel viewModel, List<Node> nodesToLayOut, bool isInitialLayout)
+        {
             if (viewModel.View != null)
             {
-                viewModel.View.Dispatcher.BeginInvoke(new Action(() => {
+                viewModel.View.Dispatcher.BeginInvoke(new Action(() =>
+                {
                     viewModel.View.UpdateLayout();
 
                     var nodesForAlgorithm = new Dictionary<Node, GraphPoint>();
@@ -205,6 +238,13 @@ namespace VisualFindReferences.Core.Graph.Model
                     viewModel.View.StartAnimation(positions, proposedZoomAndPan.Scale, proposedZoomAndPan.StartX, proposedZoomAndPan.StartY);
                 }));
             }
+        }
+
+        private static void HandleReferencingNode(FoundReferences references, VFRNodeGraph? vfrModel, List<Node> nodesToLayOut, VFRNode? targetNode, ref int filteredReferenceCount, ref bool anyAdded, Func<Project, bool> projectIsIncluded, Dictionary<Node, HashSet<Node>> connectorMap, ReferencingSymbol referencingSymbol)
+        {
+            
+
+            
         }
     }
 }

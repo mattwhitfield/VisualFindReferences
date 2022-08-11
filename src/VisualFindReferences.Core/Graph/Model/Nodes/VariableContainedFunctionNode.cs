@@ -15,11 +15,14 @@ namespace VisualFindReferences.Core.Graph.Model.Nodes
 
         public override IEnumerable<SearchableSymbol> GetSearchableSymbols()
         {
-            var variableDeclarator = NodeFoundReferences.SyntaxNode.AncestorsAndSelf().OfType<VariableDeclaratorSyntax>().First();
-            var targetSymbol = NodeFoundReferences.SemanticModel.GetDeclaredSymbol(variableDeclarator);
-            if (targetSymbol != null)
+            var variableDeclarator = NodeFoundReferences.SyntaxNode.AncestorsAndSelf().OfType<VariableDeclaratorSyntax>().FirstOrDefault();
+            if (variableDeclarator != null)
             {
-                yield return new SearchableSymbol(NodeFoundReferences, new[] { targetSymbol }, NodeFoundReferences.Solution, "variable " + variableDeclarator.Identifier.Text);
+                var targetSymbol = NodeFoundReferences.SemanticModel.GetDeclaredSymbol(variableDeclarator);
+                if (targetSymbol != null)
+                {
+                    yield return new SearchableSymbol(NodeFoundReferences, new[] { targetSymbol }, NodeFoundReferences.Solution, "variable " + variableDeclarator.Identifier.Text);
+                }
             }
         }
     }

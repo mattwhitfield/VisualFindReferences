@@ -196,6 +196,11 @@ namespace VisualFindReferences.Core.Graph.Layout
 
         protected override void InternalCompute()
         {
+            if (!_nodeGroups.Any())
+            {
+                return;
+            }
+
             // we now have nodes in their vertical groups, so now we want to try and assign vertical positions, minimizing crossings
             // start at min, forward
             var minGroup = _nodeGroups.Keys.Min();
