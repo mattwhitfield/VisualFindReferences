@@ -5,7 +5,7 @@ namespace VisualFindReferences.Core.Graph.View
 {
     public static class StyleFinder
     {
-        public static string ResourceUri { get; set; } = "/VisualFindReferences.Core;component/Themes/generic.xaml";
+        public static string ResourceUri { get; set; } = "pack://application:,,,/VisualFindReferences.Core;component/Themes/generic.xaml";
 
         public static void Apply(DependencyObject element, string styleName)
         {

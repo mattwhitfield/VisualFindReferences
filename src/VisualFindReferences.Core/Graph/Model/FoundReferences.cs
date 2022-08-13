@@ -12,7 +12,6 @@ namespace VisualFindReferences.Core.Graph.Model
             ReferencingSymbols = referencingSymbols;
             SourceDocument = sourceDocument;
             ReferencingLocations = new List<ReferencingLocation>();
-            IsTarget = true;
             Solution = solution;
         }
         public FoundReferences(ISymbol symbol, SyntaxNode syntaxNode, SemanticModel semanticModel, Solution solution, IList<ReferencingLocation> referencingLocations)
@@ -20,13 +19,8 @@ namespace VisualFindReferences.Core.Graph.Model
         {
             ReferencingLocations = referencingLocations;
             ReferencingSymbols = new List<ReferencingSymbol>();
-            IsSource = true;
             Solution = solution;
         }
-
-        public bool IsSource { get; }
-
-        public bool IsTarget { get; }
 
         public IList<ReferencingSymbol> ReferencingSymbols { get; }
 

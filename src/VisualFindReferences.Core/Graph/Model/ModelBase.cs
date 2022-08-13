@@ -11,12 +11,5 @@ namespace VisualFindReferences.Core.Graph.Model
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        public Guid Guid { get; private set; }
-
-        public ModelBase()
-        {
-            Guid = Guid.NewGuid();
-        }
     }
 }

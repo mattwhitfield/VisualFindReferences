@@ -19,13 +19,6 @@
             }
         }
 
-        protected override void OnInitialized(EventArgs e)
-        {
-            base.OnInitialized(e);
-
-            //Template = (ControlTemplate)Application.Current.FindResource("LoadingContainerVisualSource");
-        }
-
         public string Text
         {
             get => (string)GetValue(TextProperty);
