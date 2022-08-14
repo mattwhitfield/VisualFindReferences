@@ -60,7 +60,7 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 FontSize="11"
-                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabTextBrushKey}}"
                 Text="{Binding NodeSymbolType, Mode=OneTime}" />
             <TextBlock
                 Grid.Row="1"
@@ -68,7 +68,7 @@
                 Margin="6,4,0,0"
                 HorizontalAlignment="Right"
                 FontSize="14"
-                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabTextBrushKey}}"
                 Text="Symbol:" />
             <TextBlock
                 Grid.Row="2"
@@ -76,7 +76,7 @@
                 Margin="6,4,0,0"
                 HorizontalAlignment="Right"
                 FontSize="11"
-                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabTextBrushKey}}"
                 Text="Type:"
                 Visibility="{Binding ShouldShowTypeName, Converter={StaticResource VisiConverter}}" />
             <TextBlock
@@ -85,7 +85,7 @@
                 Margin="6,4,0,0"
                 HorizontalAlignment="Right"
                 FontSize="11"
-                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabTextBrushKey}}"
                 Text="Namespace:" />
             <TextBlock
                 Grid.Row="4"
@@ -93,7 +93,7 @@
                 Margin="6,4,0,0"
                 HorizontalAlignment="Right"
                 FontSize="11"
-                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabTextBrushKey}}"
                 Text="Assembly:" />
             <TextBlock
                 Grid.Row="1"
@@ -102,7 +102,7 @@
                 HorizontalAlignment="Left"
                 FontSize="14"
                 FontWeight="Bold"
-                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabTextBrushKey}}"
                 Text="{Binding ContainerName, Mode=OneTime}" />
             <TextBlock
                 Grid.Row="2"
@@ -110,7 +110,7 @@
                 Margin="6,4,0,0"
                 HorizontalAlignment="Left"
                 FontSize="11"
-                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabTextBrushKey}}"
                 Text="{Binding TypeName, Mode=OneTime}"
                 Visibility="{Binding ShouldShowTypeName, Converter={StaticResource VisiConverter}}" />
             <TextBlock
@@ -119,7 +119,7 @@
                 Margin="6,4,0,0"
                 HorizontalAlignment="Left"
                 FontSize="11"
-                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabTextBrushKey}}"
                 Text="{Binding NamespaceName, Mode=OneTime}" />
             <TextBlock
                 Grid.Row="4"
@@ -127,7 +127,7 @@
                 Margin="6,4,0,0"
                 HorizontalAlignment="Left"
                 FontSize="11"
-                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabTextBrushKey}}"
                 Text="{Binding AssemblyName, Mode=OneTime}" />
             <StackPanel
                 Grid.Row="5"
@@ -141,13 +141,13 @@
                             <StackPanel Margin="0,4,0,0" Orientation="Vertical">
                                 <TextBlock
                                     FontSize="11"
-                                    Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                                    Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabTextBrushKey}}"
                                     Text="{Binding LinePrompt, Mode=OneTime}" />
                                 <TextBlock
                                     Margin="24,2,0,0"
                                     FontFamily="Lucida Console"
                                     FontSize="11"
-                                    Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
+                                    Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabTextBrushKey}}"
                                     Text="{Binding Text, Mode=OneTime}" />
                             </StackPanel>
                         </DataTemplate>
@@ -159,7 +159,7 @@
 
     <Style x:Key="DefaultNodeViewStyle" TargetType="{x:Type v:NodeView}">
         <Setter Property="Background" Value="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabGradientBeginBrushKey}}" />
-        <Setter Property="Foreground" Value="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}" />
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTabTextBrushKey}}" />
         <Setter Property="BorderBrush" Value="{DynamicResource {x:Static platformUI:CommonDocumentColors.InnerTabActiveIndicatorBrushKey}}" />
         <Setter Property="Canvas.Left" Value="{Binding Model.X}" />
         <Setter Property="Canvas.Top" Value="{Binding Model.Y}" />
