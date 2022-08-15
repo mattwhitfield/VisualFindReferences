@@ -1,5 +1,4 @@
 // TODO - second round testing with actual syntax trees
-
 //namespace VisualFindReferences.Core.Tests.Graph.Model.Nodes
 //{
 //    using VisualFindReferences.Core.Graph.Model.Nodes;
