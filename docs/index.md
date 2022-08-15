@@ -3,6 +3,8 @@ title: Home
 ---
 ![Latest release](https://img.shields.io/github/v/release/mattwhitfield/VisualFindReferences?color=00A000) ![Last commit](https://img.shields.io/github/last-commit/mattwhitfield/VisualFindReferences?color=00A000) ![Build status](https://img.shields.io/github/workflow/status/mattwhitfield/VisualFindReferences/Extension%20build) ![Open issue count](https://img.shields.io/github/issues/mattwhitfield/VisualFindReferences)
 
+![An animated gif paints 1000 words](assets/graph_animation.gif)
+
 # Introduction 👀
 The Visual Find References Visual Studio extension adds a new, graphical reference finding experience to Visual Studio. If you are trying to understand the code flow through a new code base, and find Call Hierarchy a bit limiting, this extension is for you.
 
