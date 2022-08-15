@@ -1,3 +1,5 @@
+![An animated gif paints 1000 words](https://raw.githubusercontent.com/mattwhitfield/VisualFindReferences/main/docs/assets/graph_animation.gif)
+
 # Introduction 👀
 The Visual Find References Visual Studio extension adds a new, graphical reference finding experience to Visual Studio. If you are trying to understand the code flow through a new code base, and find Call Hierarchy a bit limiting, this extension is for you.
 
