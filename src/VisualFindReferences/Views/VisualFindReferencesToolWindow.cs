@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -34,6 +35,8 @@ namespace VisualFindReferences.Views
             _host.Model.Nodes.ToList().Each(x => _host.Model.Nodes.Remove(x));
         }
 
+        private static HashSet<Type> ParentedTypes = new HashSet<Type> { typeof(ParameterListSyntax), typeof(BlockSyntax) };
+
         public void FindReferences(IWpfTextView textView, IVisualFindReferencesPackage package)
         {
             async Task<FoundReferences> FindReferencesAsync(Action<string> updateText, NodeGraphViewModel viewModel)
@@ -46,10 +49,10 @@ namespace VisualFindReferences.Views
                 {
                     if (!NodeFactory.IsSupportedContainer(syntaxNode, out _))
                     {
-                        var parameterList = syntaxNode.AncestorsAndSelf().OfType<ParameterListSyntax>().FirstOrDefault();
-                        if (parameterList != null && NodeFactory.IsSupportedContainer(parameterList.Parent, out _))
+                        var parentableType = syntaxNode.AncestorsAndSelf().FirstOrDefault(x => ParentedTypes.Contains(x.GetType()));
+                        if (parentableType != null && NodeFactory.IsSupportedContainer(parentableType.Parent, out _))
                         {
-                            syntaxNode = parameterList.Parent;
+                            syntaxNode = parentableType.Parent;
                         }
                     }
 
