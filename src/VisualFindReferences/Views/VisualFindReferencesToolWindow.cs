@@ -52,15 +52,6 @@ namespace VisualFindReferences.Views
                 {
                     if (!NodeFactory.IsSupportedContainer(syntaxNode, out _))
                     {
-                        var parentableType = syntaxNode.AncestorsAndSelf().FirstOrDefault(x => ParentedTypes.Contains(x.GetType()));
-                        if (parentableType != null && NodeFactory.IsSupportedContainer(parentableType.Parent, out _))
-                        {
-                            syntaxNode = parentableType.Parent;
-                        }
-                    }
-
-                    if (!NodeFactory.IsSupportedContainer(syntaxNode, out _))
-                    {
                         var symbol = await SymbolFinder.FindSymbolAtPositionAsync(document, caretPosition);
                         if (symbol != null)
                         {
@@ -69,6 +60,15 @@ namespace VisualFindReferences.Views
                             {
                                 syntaxNode = node;
                             }
+                        }
+                    }
+
+                    if (!NodeFactory.IsSupportedContainer(syntaxNode, out _))
+                    {
+                        var parentableType = syntaxNode.AncestorsAndSelf().FirstOrDefault(x => ParentedTypes.Contains(x.GetType()));
+                        if (parentableType != null && NodeFactory.IsSupportedContainer(parentableType.Parent, out _))
+                        {
+                            syntaxNode = parentableType.Parent;
                         }
                     }
 
