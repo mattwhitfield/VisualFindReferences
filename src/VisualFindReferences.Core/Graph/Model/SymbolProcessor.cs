@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.FindSymbols;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using VisualFindReferences.Core.Graph.Helper;
 using VisualFindReferences.Core.Graph.Layout;
@@ -13,19 +14,23 @@ namespace VisualFindReferences.Core.Graph.Model
 {
     public class SymbolProcessor
     {
-        public static Task<FoundReferences> FindReferencesAsync(Action<string> updateText, SyntaxNodeWithSymbol searchingNode, ISymbol targetSymbol, Document document)
+        public static Task<FoundReferences> FindReferencesAsync(Action<string> updateText, SyntaxNodeWithSymbol searchingNode, ISymbol targetSymbol, Document document, CancellationToken cancellation)
         {
-            return FindReferencesAsync(updateText, searchingNode, new[] { targetSymbol }, document.Project.Solution, document);
+            return FindReferencesAsync(updateText, searchingNode, new[] { targetSymbol }, document.Project.Solution, document, cancellation);
         }
 
-        public static async Task<FoundReferences> FindReferencesAsync(Action<string> updateText, SyntaxNodeWithSymbol searchingNode, IEnumerable<ISymbol> targetSymbols, Solution solution, Document document)
+        public static async Task<FoundReferences> FindReferencesAsync(Action<string> updateText, SyntaxNodeWithSymbol searchingNode, IEnumerable<ISymbol> targetSymbols, Solution solution, Document document, CancellationToken cancellation)
         {
             var outputDictionary = new Dictionary<ISymbol, ReferencingSymbol>(SymbolEqualityComparer.Default);
 
             foreach (var targetSymbol in targetSymbols)
             {
                 updateText("Finding references...");
-                var list = await SymbolFinder.FindReferencesAsync(targetSymbol, solution).ConfigureAwait(true);
+                var list = await SymbolFinder.FindReferencesAsync(targetSymbol, solution, cancellation).ConfigureAwait(true);
+
+                await Task.Delay(4000, cancellation).ConfigureAwait(true);
+
+                cancellation.ThrowIfCancellationRequested();
 
                 updateText("Processing references...");
                 foreach (var item in list)
@@ -33,7 +38,7 @@ namespace VisualFindReferences.Core.Graph.Model
                     // for each referencing location
                     foreach (var location in item.Locations)
                     {
-                        await ProcessLocation(outputDictionary, location);
+                        await ProcessLocation(outputDictionary, location, cancellation);
                     }
                 }
             }
@@ -41,12 +46,14 @@ namespace VisualFindReferences.Core.Graph.Model
             return new FoundReferences(searchingNode.Symbol, searchingNode.SyntaxNode, searchingNode.SemanticModel, solution, outputDictionary.Values.ToList(), document);
         }
 
-        private static async Task ProcessLocation(Dictionary<ISymbol, ReferencingSymbol> outputDictionary, ReferenceLocation location)
+        private static async Task ProcessLocation(Dictionary<ISymbol, ReferencingSymbol> outputDictionary, ReferenceLocation location, CancellationToken cancellation)
         {
             // get the text, syntax node and semantic model
-            var text = await location.Document.GetTextAsync();
-            var syntaxNode = await location.Document.GetSyntaxRootAsync().ConfigureAwait(true);
-            var semanticModel = await location.Document.GetSemanticModelAsync().ConfigureAwait(true);
+            var text = await location.Document.GetTextAsync(cancellation);
+            var syntaxNode = await location.Document.GetSyntaxRootAsync(cancellation).ConfigureAwait(true);
+            var semanticModel = await location.Document.GetSemanticModelAsync(cancellation).ConfigureAwait(true);
+
+            cancellation.ThrowIfCancellationRequested();
 
             if (syntaxNode != null && semanticModel != null)
             {
@@ -229,7 +236,7 @@ namespace VisualFindReferences.Core.Graph.Model
 
                     var proposedZoomAndPan = viewModel.View.ZoomAndPan;
 
-                    if (isInitialLayout)
+                    if (isInitialLayout || viewModel.LayoutType != LayoutAlgorithmType.ForceDirected)
                     {
                         vfrModel.CalculateContentSize(positions, false, out var rect);
                         proposedZoomAndPan = viewModel.View.ZoomAndPan.GetTarget(rect);

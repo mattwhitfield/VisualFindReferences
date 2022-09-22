@@ -1,11 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace VisualFindReferences.Helper
@@ -28,15 +26,20 @@ namespace VisualFindReferences.Helper
             return null;
         }
 
-        internal static async Task<(SyntaxNode, SemanticModel)> GetTargetSymbolAsync(ITextView textView)
+        internal static async Task<(SyntaxNode, SemanticModel)> GetTargetSymbolAsync(ITextView textView, System.Threading.CancellationToken cancellation)
         {
             var caretPosition = textView.Caret.Position.BufferPosition;
 
             var document = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
             if (document != null)
             {
-                var syntaxNode = await document.GetSyntaxRootAsync().ConfigureAwait(true);
-                var semanticModel = await document.GetSemanticModelAsync().ConfigureAwait(true);
+                var syntaxNode = await document.GetSyntaxRootAsync(cancellation).ConfigureAwait(true);
+
+                cancellation.ThrowIfCancellationRequested();
+
+                var semanticModel = await document.GetSemanticModelAsync(cancellation).ConfigureAwait(true);
+
+                cancellation.ThrowIfCancellationRequested();
 
                 return (syntaxNode.FindToken(caretPosition).Parent, semanticModel);
             }

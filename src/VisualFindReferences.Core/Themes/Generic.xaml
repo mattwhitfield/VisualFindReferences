@@ -181,6 +181,7 @@
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto" />
                                             <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
                                         <v:LoadingSpinner
                                             x:Name="PART_Spinner"
@@ -194,12 +195,21 @@
                                             HorizontalAlignment="Center"
                                             Foreground="{StaticResource ViewTextColor}"
                                             Visibility="Collapsed" />
+                                        <Button
+                                            x:Name="PART_Cancel"
+                                            Grid.Row="2"
+                                            Margin="0,16,0,0"
+                                            HorizontalAlignment="Center"
+                                            Visibility="Collapsed">
+                                            <TextBlock Margin="10,4" Text="Cancel" />
+                                        </Button>
                                     </Grid>
                                 </Grid>
                             </ControlTemplate>
                         </ResourceDictionary>
                     </ControlTemplate.Resources>
                     <v:LoadingContainer
+                        Cancel="{Binding CancelLoad}"
                         IsBusy="{Binding IsBusy}"
                         Template="{StaticResource LoadingContainerVisualSource}"
                         Text="{Binding BusyText}">

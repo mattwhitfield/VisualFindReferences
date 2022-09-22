@@ -3,6 +3,7 @@
     using System;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Input;
 
     public class LoadingContainer : ContentControl
     {
@@ -11,12 +12,34 @@
 
         public static readonly DependencyProperty TextProperty = DependencyProperty.Register(nameof(Text), typeof(string), typeof(LoadingContainer), new PropertyMetadata(string.Empty, TextChanged));
 
+        public static readonly DependencyProperty MyPropertyProperty = DependencyProperty.Register(nameof(Cancel), typeof(ICommand), typeof(LoadingContainer), new PropertyMetadata(null, CancelCommandChanged));
+
+        private static void CancelCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is LoadingContainer container)
+            {
+                SetTemplateProperty<Button>(container, "PART_Cancel", x => x.Command = container.Cancel);
+            }
+        }
+
+        public override void OnApplyTemplate()
+        {
+            base.OnApplyTemplate();
+            SetTemplateProperty<Button>(this, "PART_Cancel", x => x.Command = Cancel);
+        }
+
         private static void TextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is LoadingContainer container)
             {
                 SetTemplateProperty<TextBlock>(container, "PART_Label", x => x.Text = container.Text);
             }
+        }
+
+        public ICommand Cancel
+        {
+            get { return (ICommand)GetValue(MyPropertyProperty); }
+            set { SetValue(MyPropertyProperty, value); }
         }
 
         public string Text
@@ -40,6 +63,7 @@
                 SetTemplateProperty<UIElement>(container, "PART_Label", x => x.Visibility = visibility);
                 SetTemplateProperty<UIElement>(container, "PART_Spinner", x => x.Visibility = visibility);
                 SetTemplateProperty<UIElement>(container, "PART_Border", x => x.Visibility = visibility);
+                SetTemplateProperty<UIElement>(container, "PART_Cancel", x => x.Visibility = visibility);
             }
         }
 

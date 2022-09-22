@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using VisualFindReferences.Core.Graph.Helper;
 using VisualFindReferences.Core.Graph.Layout;
 using VisualFindReferences.Core.Graph.Model;
@@ -22,11 +24,19 @@ namespace VisualFindReferences.Core.Graph.ViewModel
 
         public ObservableCollection<ConnectorViewModel> ConnectorViewModels { get; } = new ObservableCollection<ConnectorViewModel>();
 
+        private CancellationTokenSource? _cancellationTokenSource;
+
         public NodeGraphViewModel(NodeGraph nodeGraph) : base(nodeGraph)
         {
             Model = nodeGraph;
+            CancelLoad = new RelayCommand(CancelLoading);
             nodeGraph.Nodes.CollectionChanged += Nodes_CollectionChanged;
             nodeGraph.Connectors.CollectionChanged += Connectors_CollectionChanged;
+        }
+
+        private void CancelLoading()
+        {
+            _cancellationTokenSource?.Cancel();
         }
 
         private void Connectors_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -52,19 +62,36 @@ namespace VisualFindReferences.Core.Graph.ViewModel
             }
         }
 
-        public void RunAction<T>(Func<Action<string>, NodeGraphViewModel, Task<T>> task, Action<T, NodeGraph> continuation)
+        public void RunAction<T>(Func<Action<string>, NodeGraphViewModel, CancellationToken, Task<T>> task, Action<T, NodeGraph> continuation)
         {
             IsBusy = true;
             BusyText = "Loading...";
 
+            void Finish()
+            {
+                IsBusy = false;
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = null;
+            }
+
             Task.Factory.StartNew(async () =>
             {
+                _cancellationTokenSource = new CancellationTokenSource();
                 try
                 {
-                    var result = await task(SetBusyText, this);
+                    T result = default;
+                    try
+                    {
+                        result = await task(SetBusyText, this, _cancellationTokenSource.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        Finish();
+                        return;
+                    }
                     View?.Dispatcher.Invoke(new Action(() =>
                     {
-                        IsBusy = false;
+                        Finish();
                         HandleContinuation(result);
                         continuation(result, Model);
                     }));
@@ -73,7 +100,7 @@ namespace VisualFindReferences.Core.Graph.ViewModel
                 {
                     View?.Dispatcher.Invoke(new Action(() =>
                     {
-                        IsBusy = false;
+                        Finish();
                         MessageBox.Show("Error occurred while executing operation: " + e.Message + Environment.NewLine + e.StackTrace, "Error occurred", MessageBoxButton.OK, MessageBoxImage.Error);
                     }));
                 }
@@ -131,6 +158,8 @@ namespace VisualFindReferences.Core.Graph.ViewModel
                 }
             }
         }
+
+        public ICommand CancelLoad { get; }
 
         private bool _isBusy;
 
