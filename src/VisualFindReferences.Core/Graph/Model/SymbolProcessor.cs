@@ -28,8 +28,6 @@ namespace VisualFindReferences.Core.Graph.Model
                 updateText("Finding references...");
                 var list = await SymbolFinder.FindReferencesAsync(targetSymbol, solution, cancellation).ConfigureAwait(true);
 
-                await Task.Delay(4000, cancellation).ConfigureAwait(true);
-
                 cancellation.ThrowIfCancellationRequested();
 
                 updateText("Processing references...");
