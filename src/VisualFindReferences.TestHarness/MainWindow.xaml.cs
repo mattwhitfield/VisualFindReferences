@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,14 +41,16 @@ namespace VisualFindReferences.TestHarness
         {
             if (e.Key == System.Windows.Input.Key.P)
             {
-                NodeGraphViewModel.RunAction((setBusyText, viewModel) =>
+                NodeGraphViewModel.RunAction(async (setBusyText, viewModel, cancellation) =>
                 {
                     var existing = viewModel.NodeViewModels.FirstOrDefault(x => x.IsSelected)?.Model;
                     if (existing == null)
                     {
                         existing = viewModel.NodeViewModels[r.Next(viewModel.NodeViewModels.Count)].Model;
                     }
-                    return Task.FromResult(existing);
+                    await Task.Delay(2000, cancellation);
+
+                    return existing;
                 },
                 (node, nodeGraph) =>
                 {

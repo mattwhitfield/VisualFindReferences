@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using VisualFindReferences.Core.Graph.Helper;
 using VisualFindReferences.Core.Graph.Model;
@@ -39,11 +40,13 @@ namespace VisualFindReferences.Views
 
         public void FindReferences(IWpfTextView textView, IVisualFindReferencesPackage package)
         {
-            async Task<FoundReferences> FindReferencesAsync(Action<string> updateText, NodeGraphViewModel viewModel)
+            async Task<FoundReferences> FindReferencesAsync(Action<string> updateText, NodeGraphViewModel viewModel, CancellationToken cancellation)
             {
-                var (syntaxNode, semanticModel) = await TextViewHelper.GetTargetSymbolAsync(textView).ConfigureAwait(true);
+                var (syntaxNode, semanticModel) = await TextViewHelper.GetTargetSymbolAsync(textView, cancellation).ConfigureAwait(true);
                 var caretPosition = textView.Caret.Position.BufferPosition;
                 var document = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
+
+                cancellation.ThrowIfCancellationRequested();
 
                 if (syntaxNode != null)
                 {
@@ -75,7 +78,7 @@ namespace VisualFindReferences.Views
                         if (declaredSymbol != null)
                         {
                             var searchingSymbol = new SyntaxNodeWithSymbol(declaredSymbol, actualNode, semanticModel);
-                            return await SymbolProcessor.FindReferencesAsync(updateText, searchingSymbol, declaredSymbol, document);
+                            return await SymbolProcessor.FindReferencesAsync(updateText, searchingSymbol, declaredSymbol, document, cancellation);
                         }
                         else
                         {
