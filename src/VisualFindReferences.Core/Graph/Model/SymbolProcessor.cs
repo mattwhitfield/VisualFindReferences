@@ -208,9 +208,16 @@ namespace VisualFindReferences.Core.Graph.Model
             }
             else
             {
-                referencingLocationsInAllowedProjects.Each(referencingNode.NodeFoundReferences.ReferencingLocations.Add);
                 referencingNode.ReferenceLocationsAdded = false;
-                referencingNode.ReferenceLocationsAdded = referencingLocationsInAllowedProjects.Count > 0;
+                foreach (var reference in referencingLocationsInAllowedProjects)
+                {
+                    if (referencingNode.NodeFoundReferences.ReferencingLocations.Any(existing => existing.Location == reference.Location && existing.LinePrompt == reference.LinePrompt))
+                    {
+                        continue;
+                    }
+                    referencingNode.NodeFoundReferences.ReferencingLocations.Add(reference);
+                    referencingNode.ReferenceLocationsAdded = true;
+                }
             }
 
             return referencingNode;
