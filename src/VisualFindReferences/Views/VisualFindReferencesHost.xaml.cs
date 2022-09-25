@@ -91,7 +91,7 @@
 
         private static List<SearchableSymbol> GetSearchableLocations(VFRNode vfrNode)
         {
-            return vfrNode.GetSearchableSymbols().Where(x => x.Targets.Any(t => !vfrNode.SearchedSymbols.Contains(t))).ToList();
+            return vfrNode.GetSearchableSymbols().Where(x => x.Targets.Any()).ToList();
         }
 
         private ICommand GetGoToLocation(ReferencingLocation location)
