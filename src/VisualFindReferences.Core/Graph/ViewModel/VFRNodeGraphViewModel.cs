@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using VisualFindReferences.Core.Graph.Model;
+using VisualFindReferences.Core.Graph.Model.Nodes;
 
 namespace VisualFindReferences.Core.Graph.ViewModel
 {
@@ -27,10 +28,17 @@ namespace VisualFindReferences.Core.Graph.ViewModel
                 {
                     _projectFilterMatchPattern = value;
 
-                    var segments = _projectFilterMatchPattern.Split(';').Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => Regex.Escape(x.Trim()));
-                    var regexSegments = segments.Select(x => "^" + x.Replace(@"\*", @".*").Replace(@"\?", ".") + "$").ToArray();
-                    var regex = "(" + string.Join("|", regexSegments) + ")";
-                    _projectFilterMatch = new Regex(regex, RegexOptions.IgnoreCase);
+                    if (!string.IsNullOrWhiteSpace(_projectFilterMatchPattern))
+                    {
+                        var segments = _projectFilterMatchPattern.Split(';').Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => Regex.Escape(x.Trim()));
+                        var regexSegments = segments.Select(x => "^" + x.Replace(@"\*", @".*").Replace(@"\?", ".") + "$").ToArray();
+                        var regex = "(" + string.Join("|", regexSegments) + ")";
+                        _projectFilterMatch = new Regex(regex, RegexOptions.IgnoreCase);
+                    }
+                    else
+                    {
+                        _projectFilterMatch = new Regex("a^", RegexOptions.IgnoreCase);
+                    }
                     ApplyRegex();
 
                     RaisePropertyChanged(nameof(ProjectFilterMatchPattern));
@@ -112,6 +120,46 @@ namespace VisualFindReferences.Core.Graph.ViewModel
         internal Func<Project, bool> GetProjectFilter()
         {
             return x => !_excludedProjectIds.Contains(x.Id.Id);
+        }
+
+        public void RemoveFilteredNodes()
+        {
+            var filter = GetProjectFilter();
+            var nodesToRemove = new HashSet<Node>();
+            foreach (var node in NodeViewModels)
+            {
+                var vfrNode = node.Model as VFRNode;
+                var nodeProject = vfrNode?.NodeFoundReferences.SourceDocument?.Project ??
+                                  vfrNode?.NodeFoundReferences.ReferencingLocations.FirstOrDefault()?.Location.Document.Project;
+                if (nodeProject != null && !filter(nodeProject))
+                {
+                    nodesToRemove.Add(node.Model);
+                }
+            }
+
+            foreach (var node in nodesToRemove)
+            {
+                Model.Nodes.Remove(node);
+            }
+
+
+            //foreach (var connector in ConnectorViewModels)
+            //{
+            //    if (nodesToRemove.Contains(connector.Model.StartNode) || nodesToRemove.Contains(connector.Model.EndNode))
+            //    {
+            //        connectorsToRemove.Add(connector);
+            //    }
+            //}
+
+            //foreach (var node in modelsToRemove)
+            //{
+            //    NodeViewModels.Remove(node);
+            //}
+
+            //foreach (var connector in connectorsToRemove)
+            //{
+            //    ConnectorViewModels.Remove(connector);
+            //}
         }
     }
 }

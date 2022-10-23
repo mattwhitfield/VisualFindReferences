@@ -251,12 +251,5 @@ namespace VisualFindReferences.Core.Graph.Model
                 }));
             }
         }
-
-        private static void HandleReferencingNode(FoundReferences references, VFRNodeGraph? vfrModel, List<Node> nodesToLayOut, VFRNode? targetNode, ref int filteredReferenceCount, ref bool anyAdded, Func<Project, bool> projectIsIncluded, Dictionary<Node, HashSet<Node>> connectorMap, ReferencingSymbol referencingSymbol)
-        {
-            
-
-            
-        }
     }
 }

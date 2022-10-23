@@ -69,6 +69,13 @@
             }
 
             await FindReferencesForSymbolCommand.InitializeAsync(this).ConfigureAwait(true);
+
+            var window = FindToolWindow(typeof(VisualFindReferencesToolWindow), 0, true);
+            if (window != null)
+            {
+                var toolWin = window as VisualFindReferencesToolWindow;
+                toolWin?.SetPackage(this);
+            }
         }
     }
 }

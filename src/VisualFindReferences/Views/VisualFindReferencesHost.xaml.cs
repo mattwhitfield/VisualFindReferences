@@ -207,6 +207,13 @@
             FilteringDisplay.Visibility = Visibility.Collapsed;
         }
 
+        private void CloseFilteringDisplayAndApply(object sender, RoutedEventArgs e)
+        {
+            ViewModel.RemoveFilteredNodes();
+            CloseFilteringDisplay(sender, e);
+            ViewModel.ApplyLayout(true);
+        }
+
         private void FitToDisplayClick(object sender, RoutedEventArgs e)
         {
             ViewModel.FitNodesToView(false);
