@@ -381,6 +381,10 @@
                     Click="FitToDisplayClick"
                     Style="{DynamicResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">
                     <StackPanel Orientation="Horizontal">
+                        <CheckBox
+                            x:Name="AutoFitToDisplay"
+                            Click="AutoFitToDisplay_Click"
+                            Style="{DynamicResource {x:Static vsfx:VsResourceKeys.CheckBoxStyleKey}}" />
                         <Path
                             Width="12"
                             Height="12"

@@ -239,7 +239,7 @@ namespace VisualFindReferences.Core.Graph.Model
 
                     var proposedZoomAndPan = viewModel.View.ZoomAndPan;
 
-                    if (isInitialLayout || viewModel.LayoutType != LayoutAlgorithmType.ForceDirected)
+                    if (isInitialLayout || viewModel.AutoFitToDisplay)
                     {
                         vfrModel.CalculateContentSize(positions, false, out var rect);
                         proposedZoomAndPan = viewModel.View.ZoomAndPan.GetTarget(rect);

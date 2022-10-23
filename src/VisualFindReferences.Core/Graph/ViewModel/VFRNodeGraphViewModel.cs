@@ -141,25 +141,6 @@ namespace VisualFindReferences.Core.Graph.ViewModel
             {
                 Model.Nodes.Remove(node);
             }
-
-
-            //foreach (var connector in ConnectorViewModels)
-            //{
-            //    if (nodesToRemove.Contains(connector.Model.StartNode) || nodesToRemove.Contains(connector.Model.EndNode))
-            //    {
-            //        connectorsToRemove.Add(connector);
-            //    }
-            //}
-
-            //foreach (var node in modelsToRemove)
-            //{
-            //    NodeViewModels.Remove(node);
-            //}
-
-            //foreach (var connector in connectorsToRemove)
-            //{
-            //    ConnectorViewModels.Remove(connector);
-            //}
         }
     }
 }

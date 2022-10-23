@@ -7,6 +7,10 @@
 
     public class GeneralOptions : DialogPage
     {
+        [Category("Defaults")]
+        [DisplayName("Automatic fit to display")]
+        [Description("A default value for the automatic 'fit to display' option that governs whether the graph is resized after a search")]
+        public bool DefaultFitToDisplay { get; set; } = true;
 
         [Category("Defaults")]
         [DisplayName("Project filter")]
