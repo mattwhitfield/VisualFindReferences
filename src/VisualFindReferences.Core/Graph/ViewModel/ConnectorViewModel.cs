@@ -19,7 +19,22 @@ namespace VisualFindReferences.Core.Graph.ViewModel
                 if (value != _isHighlighted)
                 {
                     _isHighlighted = value;
-                    RaisePropertyChanged("IsHighlighted");
+                    RaisePropertyChanged(nameof(IsHighlighted));
+                }
+            }
+        }
+
+        private bool _isBidirectional;
+
+        public bool IsBidirectional
+        {
+            get { return _isBidirectional; }
+            set
+            {
+                if (value != _isBidirectional)
+                {
+                    _isBidirectional = value;
+                    RaisePropertyChanged(nameof(IsBidirectional));
                 }
             }
         }

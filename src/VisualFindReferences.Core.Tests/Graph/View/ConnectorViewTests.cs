@@ -42,6 +42,10 @@ namespace VisualFindReferences.Core.Tests.Graph.View
             _testClass.IsHighlighted.Should().BeFalse();
             _testClass.ViewModel.IsHighlighted = true;
             _testClass.IsHighlighted.Should().BeTrue();
+            _testClass.ViewModel.IsBidirectional = false;
+            _testClass.IsBidirectional.Should().BeFalse();
+            _testClass.ViewModel.IsBidirectional = true;
+            _testClass.IsBidirectional.Should().BeTrue();
         }
 
         [StaFact]
@@ -68,6 +72,19 @@ namespace VisualFindReferences.Core.Tests.Graph.View
 
             // Assert
             _testClass.IsHighlighted.Should().Be(testValue);
+        }
+
+        [Fact]
+        public void CanSetAndGetIsBidirectional()
+        {
+            // Arrange
+            var testValue = true;
+
+            // Act
+            _testClass.IsBidirectional = testValue;
+
+            // Assert
+            _testClass.IsBidirectional.Should().Be(testValue);
         }
     }
 }

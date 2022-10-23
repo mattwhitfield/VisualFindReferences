@@ -55,6 +55,15 @@ namespace VisualFindReferences.Core.Graph.Model
                 _connectorsByStartNode[connector.StartNode] = list = new List<Connector>();
             }
             list.Add(connector);
+
+            if (_connectorsByStartNode.TryGetValue(connector.EndNode, out var reverseList))
+            {
+                foreach (var reversedLink in reverseList.Where(x => x.EndNode == connector.StartNode))
+                {
+                    reversedLink.ViewModel.IsBidirectional = true;
+                    connector.ViewModel.IsBidirectional = true;
+                }
+            }
         }
 
         protected virtual void ConnectorRemoved(Connector connector)
