@@ -22,8 +22,17 @@ namespace VisualFindReferences.Core.Graph.View
             set { SetValue(IsHighlightedProperty, value); }
         }
 
+        public bool IsBidirectional
+        {
+            get { return (bool)GetValue(IsBidirectionalProperty); }
+            set { SetValue(IsBidirectionalProperty, value); }
+        }
+
         public static readonly DependencyProperty IsHighlightedProperty =
             DependencyProperty.Register("IsHighlighted", typeof(bool), typeof(ConnectorView), new PropertyMetadata(false));
+
+        public static readonly DependencyProperty IsBidirectionalProperty =
+            DependencyProperty.Register("IsBidirectional", typeof(bool), typeof(ConnectorView), new PropertyMetadata(false));
 
         public static readonly DependencyProperty CurveDataProperty =
             DependencyProperty.Register("CurveData", typeof(string), typeof(ConnectorView), new PropertyMetadata(string.Empty));
@@ -59,6 +68,7 @@ namespace VisualFindReferences.Core.Graph.View
         protected virtual void SynchronizeProperties()
         {
             IsHighlighted = ViewModel?.IsHighlighted ?? false;
+            IsBidirectional = ViewModel?.IsBidirectional ?? false;
         }
 
         protected virtual void ViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -109,32 +119,69 @@ namespace VisualFindReferences.Core.Graph.View
 
             var unit = new Point(Math.Cos(rotation), Math.Sin(rotation));
 
-            //                      triPoint1
-            //  start ------------- mid   center    triPoint2 ------------- end
-            //                      triPoint3
-
-            var scaledLength = TriangleLength;
-            var invScaledLength = scaledLength * -1;
-            var mid = new Point(center.X + unit.X * invScaledLength, center.Y + unit.Y * invScaledLength);
-            var triPoint2 = new Point(center.X + unit.X * scaledLength, center.Y + unit.Y * scaledLength);
-
             var pointRotation = rotation - Math.PI / 2;
+            const double ScaledLength = TriangleLength;
+            const double InverseScaledLength = ScaledLength * -1;
+            const double ScaledWidth = TriangleWidth;
+            const double InverseScaledWidth = ScaledWidth * -1;
 
-            var cos = Math.Cos(pointRotation);
-            var sin = Math.Sin(pointRotation);
-            var scaledWidth = TriangleWidth;
-            var invScaledWidth = scaledWidth * -1;
-            var triPoint1 = new Point(mid.X + cos * invScaledWidth, mid.Y + sin * invScaledWidth);
-            var triPoint3 = new Point(mid.X + cos * scaledWidth, mid.Y + sin * scaledWidth);
+            if (IsBidirectional)
+            {
+                //                              triPoint5    triPoint1
+                //  start -------- triPoint6   center-gap -- center+gap    triPoint2 ------------- end
+                //                              triPoint4    triPoint3
+                const double Gap = 3;
+                const double InverseGap = Gap * -1;
+                const double ScaledLengthWithGap = (ScaledLength * 1.5) + Gap;
+                const double InverseScaledLengthWithGap = (InverseScaledLength * 1.5) + InverseGap;
+                var centerMinusGap = new Point(center.X + unit.X * InverseGap, center.Y + unit.Y * InverseGap);
+                var centerPlusGap = new Point(center.X + unit.X * Gap, center.Y + unit.Y * Gap);
 
-            CurveData = string.Format("M{0},{1}L{2},{3} {4},{5} {6},{7} {8},{9} {2},{3} M{6},{7} {10},{11}",
-                start.X, start.Y, // 0, 1
-                mid.X, mid.Y, // 2, 3
-                triPoint1.X, triPoint1.Y, // 4, 5
-                triPoint2.X, triPoint2.Y, // 6, 7
-                triPoint3.X, triPoint3.Y, // 8, 9
-                end.X, end.Y // 10, 11
-            );
+                var cos = Math.Cos(pointRotation);
+                var sin = Math.Sin(pointRotation);
+                var triPoint1 = new Point(centerPlusGap.X + cos * InverseScaledWidth, centerPlusGap.Y + sin * InverseScaledWidth);
+                var triPoint3 = new Point(centerPlusGap.X + cos * ScaledWidth, centerPlusGap.Y + sin * ScaledWidth);
+                var triPoint5 = new Point(centerMinusGap.X + cos * InverseScaledWidth, centerMinusGap.Y + sin * InverseScaledWidth);
+                var triPoint4 = new Point(centerMinusGap.X + cos * ScaledWidth, centerMinusGap.Y + sin * ScaledWidth);
+
+                var triPoint6 = new Point(center.X + unit.X * InverseScaledLengthWithGap, center.Y + unit.Y * InverseScaledLengthWithGap);
+                var triPoint2 = new Point(center.X + unit.X * ScaledLengthWithGap, center.Y + unit.Y * ScaledLengthWithGap);
+
+                CurveData = string.Format("M{0},{1}L{2},{3} {4},{5} {6},{7} {2},{3} M{8},{9} L{10},{11} M{14},{15} L{16},{17} {12},{13} {14},{15} {18},{19}",
+                    start.X, start.Y, // 0, 1
+                    triPoint6.X, triPoint6.Y, // 2, 3
+                    triPoint5.X, triPoint5.Y, // 4, 5
+                    triPoint4.X, triPoint4.Y, // 6, 7
+                    centerMinusGap.X, centerMinusGap.Y, // 8,9
+                    centerPlusGap.X, centerPlusGap.Y, // 10, 11
+                    triPoint1.X, triPoint1.Y, // 12, 13
+                    triPoint2.X, triPoint2.Y, // 14, 15
+                    triPoint3.X, triPoint3.Y, // 16, 17
+                    end.X, end.Y // 18, 19
+                );
+            }
+            else
+            {
+                //                      triPoint1
+                //  start ------------- mid   center    triPoint2 ------------- end
+                //                      triPoint3
+                var mid = new Point(center.X + unit.X * InverseScaledLength, center.Y + unit.Y * InverseScaledLength);
+                var triPoint2 = new Point(center.X + unit.X * ScaledLength, center.Y + unit.Y * ScaledLength);
+
+                var cos = Math.Cos(pointRotation);
+                var sin = Math.Sin(pointRotation);
+                var triPoint1 = new Point(mid.X + cos * InverseScaledWidth, mid.Y + sin * InverseScaledWidth);
+                var triPoint3 = new Point(mid.X + cos * ScaledWidth, mid.Y + sin * ScaledWidth);
+
+                CurveData = string.Format("M{0},{1}L{2},{3} {4},{5} {6},{7} {8},{9} {2},{3} M{6},{7} {10},{11}",
+                    start.X, start.Y, // 0, 1
+                    mid.X, mid.Y, // 2, 3
+                    triPoint1.X, triPoint1.Y, // 4, 5
+                    triPoint2.X, triPoint2.Y, // 6, 7
+                    triPoint3.X, triPoint3.Y, // 8, 9
+                    end.X, end.Y // 10, 11
+                );
+            }
         }
     }
 }

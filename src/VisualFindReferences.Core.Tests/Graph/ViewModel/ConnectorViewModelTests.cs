@@ -5,6 +5,7 @@ namespace VisualFindReferences.Core.Tests.Graph.ViewModel
     using FluentAssertions;
     using VisualFindReferences.Core.Graph.Model;
     using System.Windows.Media;
+    using System;
 
     public class ConnectorViewModelTests
     {
@@ -38,6 +39,12 @@ namespace VisualFindReferences.Core.Tests.Graph.ViewModel
         public void CanSetAndGetIsHighlighted()
         {
             _testClass.CheckProperty(x => x.IsHighlighted);
+        }
+
+        [Fact]
+        public void CanSetAndGetIsBidirectional()
+        {
+            _testClass.CheckProperty(x => x.IsBidirectional);
         }
     }
 }

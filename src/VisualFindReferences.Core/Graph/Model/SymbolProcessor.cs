@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using VisualFindReferences.Core.Graph.Helper;
 using VisualFindReferences.Core.Graph.Layout;
 using VisualFindReferences.Core.Graph.Model.Nodes;
 using VisualFindReferences.Core.Graph.ViewModel;
@@ -173,8 +172,6 @@ namespace VisualFindReferences.Core.Graph.Model
                         continue;
                     }
 
-                    anyAdded = true;
-
                     VFRNode? referencingNode = CreateReferencingNode(references, vfrModel, nodesToLayOut, targetNode, referencingSymbol, referencingLocationsInAllowedProjects);
 
                     // create the link, avoiding duplicates
@@ -184,6 +181,7 @@ namespace VisualFindReferences.Core.Graph.Model
                         if (!hasExistingLink)
                         {
                             vfrModel.Connectors.Add(new Connector(vfrModel, referencingNode, targetNode));
+                            anyAdded = true;
                         }
                     }
                 }

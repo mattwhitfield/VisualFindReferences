@@ -304,7 +304,7 @@
                                                     HorizontalAlignment="Center"
                                                     FontSize="11"
                                                     Foreground="{DynamicResource {x:Static platformUI:EnvironmentColors.ToolWindowTextBrushKey}}"
-                                                    Text="No references found"
+                                                    Text="No new references found"
                                                     TextOptions.TextFormattingMode="Ideal" />
                                             </Grid>
                                         </Border>
