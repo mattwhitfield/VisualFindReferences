@@ -74,7 +74,7 @@ namespace VisualFindReferences.Core.Tests.Graph.View
             _testClass.IsHighlighted.Should().Be(testValue);
         }
 
-        [Fact]
+        [StaFact]
         public void CanSetAndGetIsBidirectional()
         {
             // Arrange
