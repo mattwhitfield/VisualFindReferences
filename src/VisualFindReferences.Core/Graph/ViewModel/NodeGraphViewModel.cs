@@ -34,6 +34,21 @@ namespace VisualFindReferences.Core.Graph.ViewModel
             nodeGraph.Connectors.CollectionChanged += Connectors_CollectionChanged;
         }
 
+        private bool _autoFitToDisplay;
+
+        public bool AutoFitToDisplay
+        {
+            get { return _autoFitToDisplay; }
+            set
+            {
+                if (value != _autoFitToDisplay)
+                {
+                    _autoFitToDisplay = value;
+                    RaisePropertyChanged(nameof(AutoFitToDisplay));
+                }
+            }
+        }
+
         private void CancelLoading()
         {
             _cancellationTokenSource?.Cancel();

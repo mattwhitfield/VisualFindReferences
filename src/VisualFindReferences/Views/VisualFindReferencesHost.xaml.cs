@@ -142,6 +142,7 @@
                 ViewModel.DoubleClickAction = options.DefaultDoubleClickAction;
                 ViewModel.ProjectFilterMatchPattern = options.DefaultProjectFilter;
                 ViewModel.LayoutType = options.DefaultLayoutAlgorithmType;
+                ViewModel.AutoFitToDisplay = options.DefaultFitToDisplay;
                 SetMenuChecks();
             }
         }
@@ -156,6 +157,8 @@
             SetMenuCheck(layoutMenu, "HorizontalGridMenuItem", ViewModel.LayoutType == LayoutAlgorithmType.HorizontalBalancedGrid);
             SetMenuCheck(layoutMenu, "VerticalGridMenuItem", ViewModel.LayoutType == LayoutAlgorithmType.VerticalBalancedGrid);
             SetMenuCheck(layoutMenu, "ForceDirectedMenuItem", ViewModel.LayoutType == LayoutAlgorithmType.ForceDirected);
+
+            AutoFitToDisplay.IsChecked = ViewModel.AutoFitToDisplay;
         }
 
         private void SetMenuCheck(ContextMenu menu, string name, bool value)
@@ -275,6 +278,11 @@
                         break;
                 }
             }
+        }
+
+        private void AutoFitToDisplay_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.AutoFitToDisplay = AutoFitToDisplay.IsChecked ?? false;
         }
     }
 }
