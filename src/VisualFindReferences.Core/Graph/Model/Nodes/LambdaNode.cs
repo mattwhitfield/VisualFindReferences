@@ -1,6 +1,4 @@
-﻿using System.Windows.Media;
-
-namespace VisualFindReferences.Core.Graph.Model.Nodes
+﻿namespace VisualFindReferences.Core.Graph.Model.Nodes
 {
     public class LambdaNode : VariableContainedFunctionNode
     {

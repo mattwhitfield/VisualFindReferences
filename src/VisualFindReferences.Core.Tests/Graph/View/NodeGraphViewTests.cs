@@ -1,18 +1,11 @@
 namespace VisualFindReferences.Core.Tests.Graph.View
 {
     using VisualFindReferences.Core.Graph.View;
-    using System;
     using Xunit;
     using FluentAssertions;
-    using NSubstitute;
-    using System.Collections.Generic;
     using VisualFindReferences.Core.Graph.Model;
-    using VisualFindReferences.Core.Graph.Layout;
     using System.Windows.Media;
     using System.Windows;
-    using System.Windows.Input;
-    using System.Drawing;
-    using VisualFindReferences.Core.Graph.ViewModel;
 
     public class NodeGraphViewTests
     {

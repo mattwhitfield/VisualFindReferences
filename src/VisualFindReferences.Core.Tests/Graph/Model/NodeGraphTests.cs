@@ -1,13 +1,8 @@
 namespace VisualFindReferences.Core.Tests.Graph.Model
 {
     using VisualFindReferences.Core.Graph.Model;
-    using System;
     using Xunit;
     using FluentAssertions;
-    using NSubstitute;
-    using System.Windows.Media;
-    using VisualFindReferences.Core.Graph.Layout;
-    using System.Collections.Generic;
     using VisualFindReferences.Core.Graph.ViewModel;
     using System.Collections.ObjectModel;
 

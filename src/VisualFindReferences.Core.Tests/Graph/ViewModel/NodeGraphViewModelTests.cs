@@ -1,13 +1,9 @@
 namespace VisualFindReferences.Core.Tests.Graph.ViewModel
 {
     using VisualFindReferences.Core.Graph.ViewModel;
-    using T = System.String;
-    using System;
     using Xunit;
     using FluentAssertions;
-    using System.Threading.Tasks;
     using VisualFindReferences.Core.Graph.Model;
-    using VisualFindReferences.Core.Graph.View;
     using System.Collections.ObjectModel;
     using VisualFindReferences.Core.Graph.Layout;
 

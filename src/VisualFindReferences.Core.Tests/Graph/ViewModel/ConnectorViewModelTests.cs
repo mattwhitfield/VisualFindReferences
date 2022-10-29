@@ -5,7 +5,6 @@ namespace VisualFindReferences.Core.Tests.Graph.ViewModel
     using FluentAssertions;
     using VisualFindReferences.Core.Graph.Model;
     using System.Windows.Media;
-    using System;
 
     public class ConnectorViewModelTests
     {

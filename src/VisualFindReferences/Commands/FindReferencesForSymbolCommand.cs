@@ -2,10 +2,6 @@
 {
     using System;
     using System.ComponentModel.Design;
-    using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using Microsoft.CodeAnalysis.FindSymbols;
-    using Microsoft.CodeAnalysis.Text;
     using Microsoft.VisualStudio.Shell;
     using VisualFindReferences;
     using VisualFindReferences.Helper;

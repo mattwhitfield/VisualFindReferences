@@ -1,11 +1,8 @@
 namespace VisualFindReferences.Core.Tests.Graph.View
 {
     using VisualFindReferences.Core.Graph.View;
-    using System;
     using Xunit;
     using FluentAssertions;
-    using System.ComponentModel;
-    using VisualFindReferences.Core.Graph.ViewModel;
     using VisualFindReferences.Core.Graph.Model;
 
     public class ConnectorViewTests
