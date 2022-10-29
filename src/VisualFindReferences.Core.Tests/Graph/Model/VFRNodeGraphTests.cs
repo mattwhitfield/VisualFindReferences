@@ -1,12 +1,8 @@
 namespace VisualFindReferences.Core.Tests.Graph.Model
 {
     using VisualFindReferences.Core.Graph.Model;
-    using System;
     using Xunit;
     using FluentAssertions;
-    using NSubstitute;
-    using System.Windows.Media;
-    using Microsoft.CodeAnalysis;
     using VisualFindReferences.Core.Graph.ViewModel;
 
     public class VFRNodeGraphTests

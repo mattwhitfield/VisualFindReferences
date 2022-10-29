@@ -1,7 +1,6 @@
 namespace VisualFindReferences.Core.Tests.Graph.Model
 {
     using VisualFindReferences.Core.Graph.Model;
-    using System;
     using Xunit;
     using FluentAssertions;
     using System.Collections.Generic;

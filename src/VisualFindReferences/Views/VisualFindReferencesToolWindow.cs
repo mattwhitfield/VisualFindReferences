@@ -15,20 +15,24 @@ using VisualFindReferences.Core.Graph.Model;
 using VisualFindReferences.Core.Graph.Model.Nodes;
 using VisualFindReferences.Core.Graph.ViewModel;
 using VisualFindReferences.Helper;
+using VisualFindReferences.Options;
 
 namespace VisualFindReferences.Views
 {
-    [Guid("f27b912a-9ce0-4e68-a8db-cdd2516793cd")]
+    [Guid(ToolWindowGuid)]
     internal class VisualFindReferencesToolWindow : ToolWindowPane, IVisualFindReferencesToolWindow
     {
+        public const string ToolWindowGuid = "f27b912a-9ce0-4e68-a8db-cdd2516793cd";
+        public const string Title = "Visual Find References";
+
         private readonly VisualFindReferencesHost _host;
 
-        public VisualFindReferencesToolWindow() :
+        public VisualFindReferencesToolWindow(GeneralOptions options) :
             base(null)
         {
-            Caption = "Visual Find References";
+            Caption = Title;
 
-            base.Content = _host = new VisualFindReferencesHost();
+            base.Content = _host = new VisualFindReferencesHost(options);
         }
 
         public void Clear()
@@ -97,11 +101,6 @@ namespace VisualFindReferences.Views
             }
 
             _host.ViewModel.RunAction(FindReferencesAsync, SymbolProcessor.ProcessFoundReferences);
-        }
-
-        internal void SetPackage(VisualFindReferencesPackage visualFindReferencesPackage)
-        {
-            _host.SetPackage(visualFindReferencesPackage);
         }
     }
 }

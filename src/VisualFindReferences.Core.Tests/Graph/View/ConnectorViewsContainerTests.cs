@@ -1,7 +1,6 @@
 namespace VisualFindReferences.Core.Tests.Graph.View
 {
     using VisualFindReferences.Core.Graph.View;
-    using System;
     using Xunit;
     using System.Windows;
     using FluentAssertions;

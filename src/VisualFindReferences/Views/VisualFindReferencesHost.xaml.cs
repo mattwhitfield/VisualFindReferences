@@ -1,10 +1,6 @@
 ﻿namespace VisualFindReferences.Views
 {
     using Microsoft.CodeAnalysis;
-    using Microsoft.VisualStudio.ComponentModelHost;
-    using Microsoft.VisualStudio.LanguageServices;
-    using Microsoft.VisualStudio.Shell;
-    using Microsoft.VisualStudio.TextManager.Interop;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -20,19 +16,25 @@
     using VisualFindReferences.Core.Graph.View;
     using VisualFindReferences.Core.Graph.ViewModel;
     using VisualFindReferences.Helper;
+    using VisualFindReferences.Options;
 
     /// <summary>
     /// Interaction logic for VisualFindReferencesHost.xaml
     /// </summary>
     public partial class VisualFindReferencesHost : UserControl
     {
-        private VisualFindReferencesPackage _package;
-
-        public VisualFindReferencesHost()
+        public VisualFindReferencesHost(GeneralOptions options)
         {
             InitializeComponent();
             Model = new VFRNodeGraph();
             MainDisplay.DataContext = FilteringDisplay.DataContext = ViewModel = Model.ViewModel as VFRNodeGraphViewModel;
+
+            ViewModel.DoubleClickAction = options.DefaultDoubleClickAction;
+            ViewModel.ProjectFilterMatchPattern = options.DefaultProjectFilter;
+            ViewModel.LayoutType = options.DefaultLayoutAlgorithmType;
+            ViewModel.AutoFitToDisplay = options.DefaultFitToDisplay;
+
+            SetMenuChecks();
         }
 
         public VFRNodeGraphViewModel ViewModel { get; }
@@ -130,21 +132,6 @@
         private ICommand GetDeleteCommand(Node node)
         {
             return new RelayCommand(() => Model.Nodes.Remove(node));
-        }
-
-        internal void SetPackage(VisualFindReferencesPackage visualFindReferencesPackage)
-        {
-            var packageWasNull = _package == null;
-            _package = visualFindReferencesPackage;
-            if (packageWasNull)
-            {
-                var options = _package.Options;
-                ViewModel.DoubleClickAction = options.DefaultDoubleClickAction;
-                ViewModel.ProjectFilterMatchPattern = options.DefaultProjectFilter;
-                ViewModel.LayoutType = options.DefaultLayoutAlgorithmType;
-                ViewModel.AutoFitToDisplay = options.DefaultFitToDisplay;
-                SetMenuChecks();
-            }
         }
 
         private void SetMenuChecks()
