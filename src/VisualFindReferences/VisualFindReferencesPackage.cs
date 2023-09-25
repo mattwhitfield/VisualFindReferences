@@ -5,8 +5,11 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio;
+    using Microsoft.VisualStudio.ComponentModelHost;
+    using Microsoft.VisualStudio.LanguageServices;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
+    using NuGet.VisualStudio;
     using VisualFindReferences.Commands;
     using VisualFindReferences.Core.Graph.View;
     using VisualFindReferences.Options;
@@ -23,6 +26,8 @@
     public sealed class VisualFindReferencesPackage : AsyncPackage, IVisualFindReferencesPackage
     {
         public GeneralOptions Options => (GeneralOptions)GetDialogPage(typeof(GeneralOptions));
+
+        public VisualStudioWorkspace Workspace { get; private set; }
 
         public IVisualFindReferencesToolWindow ShowToolWindow()
         {
@@ -54,6 +59,12 @@
             await base.InitializeAsync(cancellationToken, progress).ConfigureAwait(true);
 
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+            var componentModel = (IComponentModel)await GetServiceAsync(typeof(SComponentModel)).ConfigureAwait(true);
+            if (componentModel == null)
+            {
+                throw new InvalidOperationException();
+            }
+            Workspace = componentModel.GetService<VisualStudioWorkspace>();
 
             await FindReferencesForSymbolCommand.InitializeAsync(this).ConfigureAwait(true);
         }

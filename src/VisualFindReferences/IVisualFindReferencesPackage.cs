@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Microsoft.VisualStudio.LanguageServices;
     using Microsoft.VisualStudio.Threading;
     using VisualFindReferences.Options;
     using VisualFindReferences.Views;
@@ -15,5 +16,7 @@
         IVisualFindReferencesToolWindow ShowToolWindow();
 
         GeneralOptions Options { get; }
+
+        VisualStudioWorkspace Workspace { get; }
     }
 }

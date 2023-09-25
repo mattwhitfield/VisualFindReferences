@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
@@ -78,7 +79,17 @@ namespace VisualFindReferences.Views
 
                     if (NodeFactory.IsSupportedContainer(syntaxNode, out var actualNode))
                     {
-                        var declaredSymbol = semanticModel.GetDeclaredSymbol(actualNode);
+                        ISymbol declaredSymbol = null;
+                        if (semanticModel.SyntaxTree == actualNode.SyntaxTree)
+                        {
+                            declaredSymbol = semanticModel.GetDeclaredSymbol(actualNode);
+                        }
+                        else
+                        {
+                            semanticModel = await package.Workspace.CurrentSolution.GetDocument(actualNode.SyntaxTree).GetSemanticModelAsync();
+                            declaredSymbol = semanticModel.GetDeclaredSymbol(actualNode);
+                        }
+
                         if (declaredSymbol != null)
                         {
                             var searchingSymbol = new SyntaxNodeWithSymbol(declaredSymbol, actualNode, semanticModel);
