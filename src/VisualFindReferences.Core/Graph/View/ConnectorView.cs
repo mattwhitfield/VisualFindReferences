@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using VisualFindReferences.Core.Graph.Model;
@@ -147,7 +148,7 @@ namespace VisualFindReferences.Core.Graph.View
                 var triPoint6 = new Point(center.X + unit.X * InverseScaledLengthWithGap, center.Y + unit.Y * InverseScaledLengthWithGap);
                 var triPoint2 = new Point(center.X + unit.X * ScaledLengthWithGap, center.Y + unit.Y * ScaledLengthWithGap);
 
-                CurveData = string.Format("M{0},{1}L{2},{3} {4},{5} {6},{7} {2},{3} M{8},{9} L{10},{11} M{14},{15} L{16},{17} {12},{13} {14},{15} {18},{19}",
+                CurveData = string.Format(CultureInfo.InvariantCulture, "M{0},{1}L{2},{3} {4},{5} {6},{7} {2},{3} M{8},{9} L{10},{11} M{14},{15} L{16},{17} {12},{13} {14},{15} {18},{19}",
                     start.X, start.Y, // 0, 1
                     triPoint6.X, triPoint6.Y, // 2, 3
                     triPoint5.X, triPoint5.Y, // 4, 5
@@ -173,7 +174,7 @@ namespace VisualFindReferences.Core.Graph.View
                 var triPoint1 = new Point(mid.X + cos * InverseScaledWidth, mid.Y + sin * InverseScaledWidth);
                 var triPoint3 = new Point(mid.X + cos * ScaledWidth, mid.Y + sin * ScaledWidth);
 
-                CurveData = string.Format("M{0},{1}L{2},{3} {4},{5} {6},{7} {8},{9} {2},{3} M{6},{7} {10},{11}",
+                CurveData = string.Format(CultureInfo.InvariantCulture, "M{0},{1}L{2},{3} {4},{5} {6},{7} {8},{9} {2},{3} M{6},{7} {10},{11}",
                     start.X, start.Y, // 0, 1
                     mid.X, mid.Y, // 2, 3
                     triPoint1.X, triPoint1.Y, // 4, 5
