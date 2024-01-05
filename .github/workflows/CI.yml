@@ -56,7 +56,7 @@ jobs:
       run: nuget restore $env:SolutionPath -Verbosity quiet
     - name: Set version for Visual Studio Extension
       if: needs.pre_job.outputs.should_skip != 'true'
-      uses: cezarypiatek/VsixVersionAction@1.0
+      uses: cezarypiatek/VsixVersionAction@1.1
       with:
         version: '${{env.AutoVersion_AssemblySemVer}}'
         vsix-manifest-file: 'src\VisualFindReferences\Manifests\${{ matrix.VsTargetVersion }}\source.extension.vsixmanifest'
@@ -130,14 +130,14 @@ jobs:
         asset_content_type: binary/octet-stream
     - name: Publish 2022 extension to Marketplace
       if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-      uses: cezarypiatek/VsixPublisherAction@0.1
+      uses: cezarypiatek/VsixPublisherAction@1.0
       with:
         extension-file: 'dist/VisualFindReferencesVS2022.vsix'
         publish-manifest-file: 'publishManifestVS2022.json'
         personal-access-code: ${{ secrets.VISUALFINDREFERENCES_PUBLISHER_ACCESS_TOKEN }}      
     - name: Publish 2019 extension to Marketplace
       if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-      uses: cezarypiatek/VsixPublisherAction@0.1
+      uses: cezarypiatek/VsixPublisherAction@1.0
       with:
         extension-file: 'dist/VisualFindReferencesVS2019.vsix'
         publish-manifest-file: 'publishManifestVS2019.json'
